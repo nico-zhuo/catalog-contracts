@@ -1,0 +1,39 @@
+name: smoke-test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  smoke:
+    name: zod ${{ matrix.zod }} × node ${{ matrix.node }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node: ["24"]
+        zod: ["3.23.8", "4.4.3"]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+
+      - run: npm install -g pnpm@9
+
+      - name: Install deps(fixed zod version)
+        run: |
+          pnpm install --no-frozen-lockfile --ignore-scripts
+          pnpm add -D zod@${{ matrix.zod }}
+
+      - name: Print zod version
+        run: node -e "console.log('zod:', require('zod/package.json').version)"
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Smoke test
+        run: pnpm test:smoke
