@@ -1,0 +1,16 @@
+{
+  "name": "catalog-contracts",
+  "version": "1.0.0",
+  "description": "Cross-worker catalog schema contracts (image-workers / audio-workers / 3d-workers / BFF)",
+  "type": "module",
+  "exports": {
+    "./schema": "./schema.ts",
+    "./schema.zod": "./schema.zod.ts"
+  },
+  "peerDependencies": {
+    "zod": "^3.23.0"
+  },
+  "peerDependenciesMeta": {
+    "zod": { "optional": true }
+  }
+}
