@@ -1,0 +1,139 @@
+[
+  {
+    "label": "#1 enum options 为空 → 应失败",
+    "entry": {
+      "modelId": "bad",
+      "toolSlug": "t",
+      "tierId": "standard",
+      "workerKind": "image-workers",
+      "falModel": "fal-ai/x",
+      "schemaVersion": "1.0.0",
+      "handlerVersion": "v1",
+      "creditCost": { "type": "fixed", "amount": 5 },
+      "params": [
+        {
+          "name": "voice",
+          "type": "enum",
+          "labelKey": "x",
+          "options": []
+        }
+      ]
+    },
+    "expectPass": false
+  },
+  {
+    "label": "#2 number min > max → 应失败",
+    "entry": {
+      "modelId": "bad",
+      "toolSlug": "t",
+      "tierId": "standard",
+      "workerKind": "image-workers",
+      "falModel": "fal-ai/x",
+      "schemaVersion": "1.0.0",
+      "handlerVersion": "v1",
+      "creditCost": { "type": "fixed", "amount": 5 },
+      "params": [
+        {
+          "name": "speed",
+          "type": "number",
+          "labelKey": "x",
+          "min": 10,
+          "max": 1
+        }
+      ]
+    },
+    "expectPass": false
+  },
+  {
+    "label": "#3 ParamOption 无 labelKey 也无 label → 应失败",
+    "entry": {
+      "modelId": "bad",
+      "toolSlug": "t",
+      "tierId": "standard",
+      "workerKind": "image-workers",
+      "falModel": "fal-ai/x",
+      "schemaVersion": "1.0.0",
+      "handlerVersion": "v1",
+      "creditCost": { "type": "fixed", "amount": 5 },
+      "params": [
+        {
+          "name": "voice",
+          "type": "enum",
+          "labelKey": "x",
+          "options": [{ "value": "a" }]
+        }
+      ]
+    },
+    "expectPass": false
+  },
+  {
+    "label": "#4 deprecated:true 但无 deprecatedAlternatives → 应失败",
+    "entry": {
+      "modelId": "bad",
+      "toolSlug": "t",
+      "tierId": "standard",
+      "workerKind": "image-workers",
+      "falModel": "fal-ai/x",
+      "schemaVersion": "1.0.0",
+      "handlerVersion": "v1",
+      "creditCost": { "type": "fixed", "amount": 5 },
+      "params": [],
+      "deprecated": true
+    },
+    "expectPass": false
+  },
+  {
+    "label": "#4b deprecated:true 带空 alternatives → 应失败",
+    "entry": {
+      "modelId": "bad",
+      "toolSlug": "t",
+      "tierId": "standard",
+      "workerKind": "image-workers",
+      "falModel": "fal-ai/x",
+      "schemaVersion": "1.0.0",
+      "handlerVersion": "v1",
+      "creditCost": { "type": "fixed", "amount": 5 },
+      "params": [],
+      "deprecated": true,
+      "deprecatedAlternatives": []
+    },
+    "expectPass": false
+  },
+  {
+    "label": "schemaVersion 格式错 → 应失败",
+    "entry": {
+      "modelId": "bad",
+      "toolSlug": "t",
+      "tierId": "standard",
+      "workerKind": "image-workers",
+      "falModel": "fal-ai/x",
+      "schemaVersion": "v1.0",
+      "handlerVersion": "v1",
+      "creditCost": { "type": "fixed", "amount": 5 },
+      "params": []
+    },
+    "expectPass": false
+  },
+  {
+    "label": "number min 单边提供(max 缺)→ 应通过(refine #2 不触发)",
+    "entry": {
+      "modelId": "solo",
+      "toolSlug": "t",
+      "tierId": "standard",
+      "workerKind": "image-workers",
+      "falModel": "fal-ai/x",
+      "schemaVersion": "1.0.0",
+      "handlerVersion": "v1",
+      "creditCost": { "type": "fixed", "amount": 5 },
+      "params": [
+        {
+          "name": "seed",
+          "type": "number",
+          "labelKey": "x",
+          "min": 0
+        }
+      ]
+    },
+    "expectPass": true
+  }
+]

@@ -1,0 +1,59 @@
+{
+  "modelId": "kokoro-tts",
+  "toolSlug": "ai-character-voice",
+  "tierId": "standard",
+  "workerKind": "audio-workers",
+  "falModel": "fal-ai/kokoro",
+  "schemaVersion": "1.0.0",
+  "handlerVersion": "abc1234",
+  "creditCost": {
+    "type": "perUnit",
+    "paramRef": "charLimit",
+    "table": {
+      "1000": 10,
+      "2000": 18,
+      "3000": 25
+    }
+  },
+  "params": [
+    {
+      "name": "voice",
+      "type": "enum",
+      "labelKey": "toolbar.voiceLabel",
+      "options": [
+        { "value": "novice", "labelKey": "toolbar.voiceNovice" },
+        { "value": "shimmer", "label": "Shimmer" }
+      ],
+      "defaultValue": "novice",
+      "required": true
+    },
+    {
+      "name": "speed",
+      "type": "number",
+      "labelKey": "toolbar.speedLabel",
+      "min": 0.5,
+      "max": 2,
+      "step": 0.1,
+      "defaultValue": 1
+    },
+    {
+      "name": "prompt",
+      "type": "text",
+      "labelKey": "toolbar.promptLabel",
+      "placeholderKey": "toolbar.promptPlaceholder"
+    },
+    {
+      "name": "enableSafetyChecker",
+      "type": "boolean",
+      "labelKey": "toolbar.safetyLabel",
+      "defaultValue": true
+    },
+    {
+      "name": "referenceAudio",
+      "type": "file",
+      "labelKey": "toolbar.referenceAudioLabel",
+      "accept": "audio/*"
+    }
+  ],
+  "supportsReferenceImage": false
+}
