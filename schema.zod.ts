@@ -110,6 +110,7 @@ export const ModelCatalogEntrySchema = z.object({
   creditCost: CreditCostRuleSchema,
   params: z.array(ParamSchemaSchema),
   supportsReferenceImage: z.boolean().optional(),
+  maxReferenceImages: z.number().int().positive().optional(),
   deprecated: z.boolean().optional(),
   deprecatedAlternatives: z.array(z.string().min(1)).optional(),
 }).superRefine((v, ctx) => {

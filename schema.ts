@@ -140,6 +140,15 @@ export interface ModelCatalogEntry {
   supportsReferenceImage?: boolean;
 
   /**
+   * 参考图最大张数(v1.1.0 引入)。
+   *
+   * - 缺省时按 1 张处理(向后兼容 v1.0.0 已发布的 handler)
+   * - 前端据此渲染上传槽位数;worker 侧 standard-3d-handler 据此做 server-side 校验
+   * - body 契约统一为 `image_urls: string[]`,长度 ≤ maxReferenceImages
+   */
+  maxReferenceImages?: number;
+
+  /**
    * 弃用标记(§8.4 弃用流程第 1 步)。
    *
    * - true:BFF 在 /generate 路径返回 410 MODEL_DEPRECATED + body.alternatives
@@ -167,4 +176,4 @@ export interface WorkerCatalogEntry {
 }
 
 /** 当前 schema 版本,所有新 entry 必须用此值。 */
-export const CURRENT_SCHEMA_VERSION = "1.0.0";
+export const CURRENT_SCHEMA_VERSION = "1.1.0";
