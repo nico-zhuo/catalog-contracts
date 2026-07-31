@@ -6,6 +6,82 @@ schemaVersion 变更记录。所有版本号遵循 [semver](https://semver.org/)
 
 ---
 
+## [1.2.0] - 2026-07-31
+
+### 变更类型：MINOR（在 1.1.0 基础上加两个前向兼容字段）
+
+承接 v1.1.0（maxReferenceImages，3d-workers 用）继续 MINOR。image-workers 全切方案落地。
+
+#### 加字段
+
+| 字段 | 必填 | 语义 |
+|---|---|---|
+| `maxDimension: number` | ✅ required | handler 实际允许的最大长边像素。A 类 SIZE_TABLE 锁长边（如 flux-2-pro=1024）；B 类 enum 里允许的最大档对应像素（如 nano-banana-pro 4K=4096）。前端用于参考图尺寸 clamp + UI 提示。 |
+| `supportsQueue?: boolean` | ❌ optional（默认 true） | 是否走异步队列。vendor-agnostic 功能性字段，替代原方案的 `provider: "fal"\|"modal"`（拒绝 vendor 耦合，详见 `image-workers/docs/全切方案.md` §2.3）。前端 `shouldQueue = (catalogEntry.supportsQueue ?? true) && isCanvasFlow`。 |
+
+#### 设计理由（catalog 表达「能力」不表达「实现」）
+
+- `maxDimension` 进 catalog：是模型的物理/功能属性，换 vendor 时仍成立
+- `supportsQueue` 进 catalog：是功能性字段（异步 vs 同步），换 vendor 时 handler 内部改 submit 实现，catalog schema 零改动
+- 拒绝 `provider: "fal"|"modal"`：实现细节，换 vendor 时连锁改 schema 枚举 + 所有 handler describe() + BFF/前端分支，违反「catalog 永久稳定」契约
+
+#### 字段筛选决策框架（供其他 worker 仓借鉴）
+
+详见 `image-workers/docs/全切方案.md` §5.1 三问：
+1. 物理/功能属性？→ 进 catalog
+2. 实现细节？→ 不进
+3. 换 vendor 时需要改吗？→ 改的不进，不改的进
+
+#### 兼容性
+
+- `maxDimension` 理论上是 required，但 v1.1.0 老 entry 在 KV 里不带头部 → sync-catalog 跑完前 BFF 可能读到无该字段的 entry。BFF 侧需要 `?? fallback` 或强制 sync-catalog 后再升前端。**部署顺序：先升后端 handler + sync-catalog，再升前端。**
+- `supportsQueue` optional，老 entry 不带 = 默认 true（与现有 fal 全异步一致）
+
+---
+
+## [1.1.0] - 2026-07-24
+
+### 变更类型：MINOR（加 optional 字段，向后兼容）
+
+#### 加字段
+
+| 字段 | 必填 | 语义 |
+|---|---|---|
+| `maxReferenceImages?: number` | ❌ optional（缺省 = 1 张） | 参考图最大张数。3d-workers 用，前端据此渲染上传槽位数，worker 侧 standard-3d-handler 据此做 server-side 校验。body 契约 `image_urls: string[]`，长度 ≤ maxReferenceImages。 |
+
+---
+
+## [1.0.0] - 2026-07-20 ✅ Review Passed (merge)
+
+### 变更类型：MINOR（加两个可选/前向兼容字段，老 handler 零回测）
+
+#### 加字段
+
+| 字段 | 必填 | 语义 |
+|---|---|---|
+| `maxDimension: number` | ✅ required | handler 实际允许的最大长边像素。A 类 SIZE_TABLE 锁长边（如 flux-2-pro=1024）；B 类 enum 里允许的最大档对应像素（如 nano-banana-pro 4K=4096）。前端用于参考图尺寸 clamp + UI 提示。 |
+| `supportsQueue?: boolean` | ❌ optional（默认 true） | 是否走异步队列。vendor-agnostic 功能性字段，替代原方案的 `provider: "fal"\|"modal"`（拒绝 vendor 耦合，详见 `image-workers/docs/全切方案.md` §2.3）。前端 `shouldQueue = (catalogEntry.supportsQueue ?? true) && isCanvasFlow`。 |
+
+#### 设计理由（catalog 表达「能力」不表达「实现」）
+
+- `maxDimension` 进 catalog：是模型的物理/功能属性，换 vendor 时仍成立
+- `supportsQueue` 进 catalog：是功能性字段（异步 vs 同步），换 vendor 时 handler 内部改 submit 实现，catalog schema 零改动
+- 拒绝 `provider: "fal"|"modal"`：实现细节，换 vendor 时连锁改 schema 枚举 + 所有 handler describe() + BFF/前端分支，违反「catalog 永久稳定」契约
+
+#### 字段筛选决策框架（供其他 worker 仓借鉴）
+
+详见 `image-workers/docs/全切方案.md` §5.1 三问：
+1. 物理/功能属性？→ 进 catalog
+2. 实现细节？→ 不进
+3. 换 vendor 时需要改吗？→ 改的不进，不改的进
+
+#### 兼容性
+
+- `maxDimension` 理论上是 required，但 v1.0.0 老 entry 在 KV 里不带头部 → sync-catalog 跑完前 BFF 可能读到无该字段的 entry。BFF 侧需要 `?? fallback` 或强制 sync-catalog 后再升前端。**部署顺序：先升后端 handler + sync-catalog，再升前端。**
+- `supportsQueue` optional，老 entry 不带 = 默认 true（与现有 fal 全异步一致）
+
+---
+
 ## [1.0.0] - 2026-07-20 ✅ Review Passed (merge)
 
 前后端 merge 后的 v1.0.0 最终版。基于:
@@ -79,5 +155,7 @@ schemaVersion 变更记录。所有版本号遵循 [semver](https://semver.org/)
 | BFF 版本 | 支持 schemaVersion |
 |---|---|
 | v1.0.0 | ^1.0.0 |
+| v1.1.0 | ^1.0.0 \|\| ^1.1.0 |
+| v1.2.0 | ^1.0.0 \|\| ^1.1.0 \|\| ^1.2.0 |
 
 > BFF owner 升级时,在此表加一行。

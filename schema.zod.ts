@@ -109,6 +109,8 @@ export const ModelCatalogEntrySchema = z.object({
   handlerVersion: z.string().min(1),
   creditCost: CreditCostRuleSchema,
   params: z.array(ParamSchemaSchema),
+  maxDimension: z.number().int().positive(),
+  supportsQueue: z.boolean().optional(),
   supportsReferenceImage: z.boolean().optional(),
   maxReferenceImages: z.number().int().positive().optional(),
   deprecated: z.boolean().optional(),

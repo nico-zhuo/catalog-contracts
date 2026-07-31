@@ -136,6 +136,35 @@ export interface ModelCatalogEntry {
   /** 参数 schema 数组。前端 ParamForm 按 type 分支渲染。 */
   params: ParamSchema[];
 
+  /**
+   * handler 实际允许的最大长边像素。
+   *
+   * 语义：handler 对 fal 输出尺寸的硬约束（A 类 SIZE_TABLE 锁长边）
+   * 或 enum 里允许的最大档对应像素（B 类无 resolution 档时取 fal enum
+   * 默认输出，有 resolution 档时取最高档）。
+   *
+   * 前端用于：
+   *   - 参考图上传前的尺寸 clamp（避免传超大图给 fal）
+   *   - UI 显示「最大 2K」之类提示
+   *
+   * handler 必须在 catalog 块显式声明（无默认值）。
+   */
+  maxDimension: number;
+
+  /**
+   * 是否走异步队列（submit + poll 模式）。
+   *
+   * vendor-agnostic 的功能性字段（不暴露 provider 实现）：
+   *   - fal 全异步 → true（默认）
+   *   - 未来同步自部署 → false
+   *
+   * 前端 shouldQueue 判断：`(catalogEntry.supportsQueue ?? true) && isCanvasFlow`
+   * 换 vendor 时 handler 内部改 submit 实现，catalog schema 零改动。
+   *
+   * 不给 = 默认 true（与现有 fal 全异步行为一致，老 handler 零回测）。
+   */
+  supportsQueue?: boolean;
+
   /** 是否支持参考图(I2I)。决定折叠态是否显示占位框。 */
   supportsReferenceImage?: boolean;
 
@@ -176,4 +205,4 @@ export interface WorkerCatalogEntry {
 }
 
 /** 当前 schema 版本,所有新 entry 必须用此值。 */
-export const CURRENT_SCHEMA_VERSION = "1.1.0";
+export const CURRENT_SCHEMA_VERSION = "1.2.0";
