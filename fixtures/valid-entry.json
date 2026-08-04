@@ -55,5 +55,6 @@
       "accept": "audio/*"
     }
   ],
-  "supportsReferenceImage": false
+  "supportsReferenceImage": false,
+  "maxDimension": 1024
 }

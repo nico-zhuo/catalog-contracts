@@ -65,12 +65,12 @@ catalog-contracts/
 
 CI matrix(node 24 × zod {3.23.8, 4.4.3})对每条 PR 跑 smoke test,确保:
 - schema.zod.ts 只用两个版本都稳定的 API 子集
-- 4 个 refine 行为在两个版本下一致
+- 5 个 refine 行为在两个版本下一致
 - 任何误用 4.x 独有 API(如 `discriminatedUnion` 内部 `.refine()`)→ 3.23 fail,PR 拦
 
 **已知陷阱**:zod 3.x 的 `discriminatedUnion` 不接受被 `.refine()` 包装的 case。跨字段 refine 必须放到顶层 `superRefine()` 处理。
 
-## 4 个 refine
+## 5 个 refine
 
 | # | 位置 | 触发条件 |
 |---|------|---------|
@@ -78,6 +78,7 @@ CI matrix(node 24 × zod {3.23.8, 4.4.3})对每条 PR 跑 smoke test,确保:
 | 2 | `ModelCatalogEntrySchema` 顶层 superRefine | number case `min > max`(两边都提供才触发) |
 | 3 | `ParamOptionSchema` | 缺 `labelKey` 且缺 `label` |
 | 4 | `ModelCatalogEntrySchema` 顶层 superRefine | `deprecated: true` 但 `deprecatedAlternatives` 缺失/空 |
+| 5 | `ModelCatalogEntrySchema` 顶层 superRefine | 非 `deprecated: true` 但 `maxDimension` 缺失（v1.3.0 加，豁免 §8.4 tombstone） |
 
 ## 唯一非零接触边界
 

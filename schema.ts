@@ -147,9 +147,15 @@ export interface ModelCatalogEntry {
    *   - 参考图上传前的尺寸 clamp（避免传超大图给 fal）
    *   - UI 显示「最大 2K」之类提示
    *
-   * handler 必须在 catalog 块显式声明（无默认值）。
+   * 必填语义：非 deprecated entry 必须显式声明（schema.zod.ts refine #5
+   * 强制）。deprecated tombstone（§8.4 handler 已删，历史 KV 保留）豁免
+   * —— 老 entry 在该字段加入前就已落 KV，强制必填会让 BFF safeParse 把
+   * tombstone skip 掉，连累同 toolSlug 下其他 entry。
+   *
+   * TS 类型层面 optional：消费者访问 `.maxDimension` 需做类型守护
+   *（`?? fallback` 或先检查 `deprecated` 字段）。
    */
-  maxDimension: number;
+  maxDimension?: number;
 
   /**
    * 是否走异步队列（submit + poll 模式）。
@@ -205,4 +211,4 @@ export interface WorkerCatalogEntry {
 }
 
 /** 当前 schema 版本,所有新 entry 必须用此值。 */
-export const CURRENT_SCHEMA_VERSION = "1.2.0";
+export const CURRENT_SCHEMA_VERSION = "1.3.0";
