@@ -6,6 +6,45 @@ schemaVersion 变更记录。所有版本号遵循 [semver](https://semver.org/)
 
 ---
 
+## [1.3.0] - 2026-08-04
+
+### 变更类型：MINOR（放宽 required 字段 + 加 refine 条件，runtime 向后兼容 / TS type-level breaking）
+
+#### 背景
+
+`scripts/verify-catalog.ts` 早已程序化豁免 deprecated entry 的 schema 校验（line 49-55 注释精确预言："schema bump 时旧条目永远 fail（maxDimension required 等场景）"）。但 schema 本身没 codify 该豁免，BFF 直接调 `ModelCatalogEntrySchema.safeParse` 不豁免 → §8.4 tombstone 在 KV 里因缺 `maxDimension` 被 graceful skip，连累同 toolSlug 下其他 entry 的 catalog-cache 命中（image-workers photo-to-poster 线上事故）。
+
+本次 codify 该豁免到 schema 本身，所有下游消费者（BFF / 未来的 worker verify / 其他下游）自动受益。
+
+#### 字段变更
+
+| 字段 | 改前（1.2.0） | 改后（1.3.0） |
+|---|---|---|
+| `maxDimension` | `z.number().int().positive()`（required） | `z.number().int().positive().optional()` + refine #5 |
+| TS 类型 | `maxDimension: number` | `maxDimension?: number` |
+
+#### 新 refine #5
+
+| # | 位置 | 触发条件 |
+|---|------|---------|
+| 5 | `ModelCatalogEntrySchema` 顶层 superRefine | 非 `deprecated: true` 但 `maxDimension` 缺失 |
+
+语义：`deprecated: true` 的 §8.4 tombstone 豁免 `maxDimension` 必填；非 deprecated 的活跃 entry 仍必须显式声明。
+
+#### 兼容性
+
+- **Runtime**：向后兼容。所有现存 handler describe() 输出仍带 `maxDimension`，parse 行为不变；deprecated tombstone 从 "fail" 变 "pass" 是行为修复。
+- **TS type-level**：`maxDimension: number` → `maxDimension?: number` 是 type-level breaking。消费者若直接 `entry.maxDimension.toFixed()` 而不做类型守护会 TS 编译错。已知消费点（image-workers BFF）需配合改 `?? fallback`。
+- **架构契约**：补齐 §8.4 弃用流程的字面与实质对齐 —— tombstone 在 catalog schema 层合法化，不再依赖消费者程序化豁免。
+
+#### 部署顺序
+
+1. image-workers / audio-workers / 3d-workers 各自 bump submodule pointer
+2. BFF 配合改 type-level 消费点（`?? fallback` 模式）
+3. sync-catalog 不需要重跑（已落 KV 的 entry 形状不变）
+
+---
+
 ## [1.2.0] - 2026-07-31
 
 ### 变更类型：MINOR（在 1.1.0 基础上加两个前向兼容字段）
