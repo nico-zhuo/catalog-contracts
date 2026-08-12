@@ -6,6 +6,86 @@ schemaVersion 变更记录。所有版本号遵循 [semver](https://semver.org/)
 
 ---
 
+## [1.4.0] - 2026-08-12
+
+### 变更类型：MINOR（加可选字段 `outputFormat`，runtime 向后兼容）
+
+#### 背景
+
+ai-logo-maker 工具三档部署引入：master 档用 Recraft V4.1 `text-to-vector` 端点输出**真 SVG 矢量**，是 logo 工具的核心卖点（可编辑 / 无损缩放 / 直进 Figma/Illustrator）。前端需要在生成前就显示「SVG 可编辑」徽标 + 决定 `<img>` 渲染策略（SVG 可 CSS 着色），不能等响应 content_type 到了再切换。
+
+`outputFormat` codify 此契约：catalog entry 显式声明「我保证输出 PNG / SVG」，前端 pre-gen UI 据此渲染。
+
+#### 字段变更
+
+| 字段 | 改前（1.3.0） | 改后（1.4.0） |
+|---|---|---|
+| `outputFormat` | — | `"png" \| "svg"` optional |
+| TS 类型 | — | `outputFormat?: "png" \| "svg"` |
+
+#### 不进 fal params 的设计理由
+
+`outputFormat` **不是** fal submit input 字段，catalog 也不透传给 fal。handler 通过：
+- 选用不同 endpoint（如 `text-to-vector` 恒输出 SVG）
+- 或在 `defaults` 里设 `output_format: "png"`（Ideogram）
+实际控制输出，catalog 字段只是「对外契约声明」，避免「UI 看不到 ≠ API 调不到」的反向漏出。
+
+#### 兼容性
+
+- **Runtime**：纯加 optional 字段，老 entry（无 outputFormat）parse 行为不变。
+- **TS type-level**：纯新增 optional，无 breaking。
+- **BFF**：读取时 `entry.outputFormat ?? null`，无需 fallback 改造。
+- **前端**：可选消费 —— 不读则忽略；读则按 "svg" 切换渲染策略。
+- **sync-catalog**：不需要重跑老 handler（fields 不变，只新 handler 带 outputFormat）。
+
+#### 部署顺序
+
+1. 本 PR（catalog-contracts v1.4.0）合并到 main
+2. image-workers bump submodule pointer + 部署 ai-logo-maker 三档
+3. BFF 升 catalog-cache 支持范围到 `^1.0.0 || ^1.1.0 || ^1.2.0 || ^1.3.0 || ^1.4.0`
+4. 前端读 outputFormat 切换 SVG 渲染策略（可选，不阻塞后端部署）
+
+---
+
+## [1.3.0] - 2026-08-04
+
+### 变更类型：MINOR（放宽 required 字段 + 加 refine 条件，runtime 向后兼容 / TS type-level breaking）
+
+#### 背景
+
+`scripts/verify-catalog.ts` 早已程序化豁免 deprecated entry 的 schema 校验（line 49-55 注释精确预言："schema bump 时旧条目永远 fail（maxDimension required 等场景）"）。但 schema 本身没 codify 该豁免，BFF 直接调 `ModelCatalogEntrySchema.safeParse` 不豁免 → §8.4 tombstone 在 KV 里因缺 `maxDimension` 被 graceful skip，连累同 toolSlug 下其他 entry 的 catalog-cache 命中（image-workers photo-to-poster 线上事故）。
+
+本次 codify 该豁免到 schema 本身，所有下游消费者（BFF / 未来的 worker verify / 其他下游）自动受益。
+
+#### 字段变更
+
+| 字段 | 改前（1.2.0） | 改后（1.3.0） |
+|---|---|---|
+| `maxDimension` | `z.number().int().positive()`（required） | `z.number().int().positive().optional()` + refine #5 |
+| TS 类型 | `maxDimension: number` | `maxDimension?: number` |
+
+#### 新 refine #5
+
+| # | 位置 | 触发条件 |
+|---|------|---------|
+| 5 | `ModelCatalogEntrySchema` 顶层 superRefine | 非 `deprecated: true` 但 `maxDimension` 缺失 |
+
+语义：`deprecated: true` 的 §8.4 tombstone 豁免 `maxDimension` 必填；非 deprecated 的活跃 entry 仍必须显式声明。
+
+#### 兼容性
+
+- **Runtime**：向后兼容。所有现存 handler describe() 输出仍带 `maxDimension`，parse 行为不变；deprecated tombstone 从 "fail" 变 "pass" 是行为修复。
+- **TS type-level**：`maxDimension: number` → `maxDimension?: number` 是 type-level breaking。消费者若直接 `entry.maxDimension.toFixed()` 而不做类型守护会 TS 编译错。已知消费点（image-workers BFF）需配合改 `?? fallback`。
+- **架构契约**：补齐 §8.4 弃用流程的字面与实质对齐 —— tombstone 在 catalog schema 层合法化，不再依赖消费者程序化豁免。
+
+#### 部署顺序
+
+1. image-workers / audio-workers / 3d-workers 各自 bump submodule pointer
+2. BFF 配合改 type-level 消费点（`?? fallback` 模式）
+3. sync-catalog 不需要重跑（已落 KV 的 entry 形状不变）
+
+---
+
 ## [1.2.0] - 2026-07-31
 
 ### 变更类型：MINOR（在 1.1.0 基础上加两个前向兼容字段）

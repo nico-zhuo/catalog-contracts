@@ -147,9 +147,15 @@ export interface ModelCatalogEntry {
    *   - 参考图上传前的尺寸 clamp（避免传超大图给 fal）
    *   - UI 显示「最大 2K」之类提示
    *
-   * handler 必须在 catalog 块显式声明（无默认值）。
+   * 必填语义：非 deprecated entry 必须显式声明（schema.zod.ts refine #5
+   * 强制）。deprecated tombstone（§8.4 handler 已删，历史 KV 保留）豁免
+   * —— 老 entry 在该字段加入前就已落 KV，强制必填会让 BFF safeParse 把
+   * tombstone skip 掉，连累同 toolSlug 下其他 entry。
+   *
+   * TS 类型层面 optional：消费者访问 `.maxDimension` 需做类型守护
+   *（`?? fallback` 或先检查 `deprecated` 字段）。
    */
-  maxDimension: number;
+  maxDimension?: number;
 
   /**
    * 是否走异步队列（submit + poll 模式）。
@@ -176,6 +182,22 @@ export interface ModelCatalogEntry {
    * - body 契约统一为 `image_urls: string[]`,长度 ≤ maxReferenceImages
    */
   maxReferenceImages?: number;
+
+  /**
+   * handler 输出格式声明（v1.4.0 引入）。
+   *
+   * 语义：handler 对外（R2 url + 响应 `images[].content_type`）保证的输出格式。
+   * 不设 = fal 默认（通常 image/webp），前端从响应 content_type 自行读取。
+   *
+   * 用途：
+   *   - "svg"：master 档 vector endpoint 输出（如 Recraft V4.1 text-to-vector）
+   *     前端据此在生成前显示「SVG 可编辑矢量」卖点徽标 + 决定 <img> 渲染策略
+   *   - "png"：明确透明背景 PNG（如 Ideogram output_format=png）
+   *
+   * 不进 fal params —— 由 handler 通过选用不同 endpoint / 默认值控制，
+   * catalog 字段只是「对外契约声明」，不参与 fal submit input。
+   */
+  outputFormat?: "png" | "svg";
 
   /**
    * 弃用标记(§8.4 弃用流程第 1 步)。
@@ -205,4 +227,4 @@ export interface WorkerCatalogEntry {
 }
 
 /** 当前 schema 版本,所有新 entry 必须用此值。 */
-export const CURRENT_SCHEMA_VERSION = "1.2.0";
+export const CURRENT_SCHEMA_VERSION = "1.4.0";

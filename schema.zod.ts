@@ -109,10 +109,11 @@ export const ModelCatalogEntrySchema = z.object({
   handlerVersion: z.string().min(1),
   creditCost: CreditCostRuleSchema,
   params: z.array(ParamSchemaSchema),
-  maxDimension: z.number().int().positive(),
+  maxDimension: z.number().int().positive().optional(),
   supportsQueue: z.boolean().optional(),
   supportsReferenceImage: z.boolean().optional(),
   maxReferenceImages: z.number().int().positive().optional(),
+  outputFormat: z.enum(["png", "svg"]).optional(),
   deprecated: z.boolean().optional(),
   deprecatedAlternatives: z.array(z.string().min(1)).optional(),
 }).superRefine((v, ctx) => {
@@ -122,6 +123,18 @@ export const ModelCatalogEntrySchema = z.object({
       code: z.ZodIssueCode.custom,
       path: ["deprecatedAlternatives"],
       message: "deprecated: true 时必须提供非空 deprecatedAlternatives",
+    });
+  }
+  // refine #5:非 deprecated → maxDimension 必填
+  // codify scripts/verify-catalog.ts 已有的程序化豁免：deprecated tombstone
+  // 是 §8.4 历史 entry（handler 已删，describe() 不再写），其 maxDimension
+  // 字段在 schema 加 required 前就缺失，强制必填会让 BFF safeParse 把整个
+  // tombstone skip 掉，连累同 toolSlug 下其他 entry 的 catalog-cache。
+  if (!v.deprecated && v.maxDimension == null) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["maxDimension"],
+      message: "非 deprecated entry 必须提供 maxDimension（deprecated tombstone 豁免）",
     });
   }
   // refine #2:number case 的 min ≤ max(单边提供时不触发)

@@ -125,6 +125,7 @@
       "schemaVersion": "1.0.0",
       "handlerVersion": "v1",
       "creditCost": { "type": "fixed", "amount": 5 },
+      "maxDimension": 1024,
       "params": [
         {
           "name": "seed",
@@ -133,6 +134,38 @@
           "min": 0
         }
       ]
+    },
+    "expectPass": true
+  },
+  {
+    "label": "#5 非 deprecated 缺 maxDimension → 应失败",
+    "entry": {
+      "modelId": "bad",
+      "toolSlug": "t",
+      "tierId": "standard",
+      "workerKind": "image-workers",
+      "falModel": "fal-ai/x",
+      "schemaVersion": "1.3.0",
+      "handlerVersion": "v1",
+      "creditCost": { "type": "fixed", "amount": 5 },
+      "params": []
+    },
+    "expectPass": false
+  },
+  {
+    "label": "#5b deprecated 缺 maxDimension → 应通过（tombstone 豁免）",
+    "entry": {
+      "modelId": "old-model",
+      "toolSlug": "t",
+      "tierId": "standard",
+      "workerKind": "image-workers",
+      "falModel": "fal-ai/old",
+      "schemaVersion": "1.3.0",
+      "handlerVersion": "v1",
+      "creditCost": { "type": "fixed", "amount": 5 },
+      "params": [],
+      "deprecated": true,
+      "deprecatedAlternatives": ["new-model"]
     },
     "expectPass": true
   }
