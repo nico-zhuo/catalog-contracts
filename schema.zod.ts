@@ -113,6 +113,7 @@ export const ModelCatalogEntrySchema = z.object({
   supportsQueue: z.boolean().optional(),
   supportsReferenceImage: z.boolean().optional(),
   maxReferenceImages: z.number().int().positive().optional(),
+  outputFormat: z.enum(["png", "svg"]).optional(),
   deprecated: z.boolean().optional(),
   deprecatedAlternatives: z.array(z.string().min(1)).optional(),
 }).superRefine((v, ctx) => {

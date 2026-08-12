@@ -184,6 +184,22 @@ export interface ModelCatalogEntry {
   maxReferenceImages?: number;
 
   /**
+   * handler 输出格式声明（v1.4.0 引入）。
+   *
+   * 语义：handler 对外（R2 url + 响应 `images[].content_type`）保证的输出格式。
+   * 不设 = fal 默认（通常 image/webp），前端从响应 content_type 自行读取。
+   *
+   * 用途：
+   *   - "svg"：master 档 vector endpoint 输出（如 Recraft V4.1 text-to-vector）
+   *     前端据此在生成前显示「SVG 可编辑矢量」卖点徽标 + 决定 <img> 渲染策略
+   *   - "png"：明确透明背景 PNG（如 Ideogram output_format=png）
+   *
+   * 不进 fal params —— 由 handler 通过选用不同 endpoint / 默认值控制，
+   * catalog 字段只是「对外契约声明」，不参与 fal submit input。
+   */
+  outputFormat?: "png" | "svg";
+
+  /**
    * 弃用标记(§8.4 弃用流程第 1 步)。
    *
    * - true:BFF 在 /generate 路径返回 410 MODEL_DEPRECATED + body.alternatives
@@ -211,4 +227,4 @@ export interface WorkerCatalogEntry {
 }
 
 /** 当前 schema 版本,所有新 entry 必须用此值。 */
-export const CURRENT_SCHEMA_VERSION = "1.3.0";
+export const CURRENT_SCHEMA_VERSION = "1.4.0";
