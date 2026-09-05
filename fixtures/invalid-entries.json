@@ -168,5 +168,37 @@
       "deprecatedAlternatives": ["new-model"]
     },
     "expectPass": true
+  },
+  {
+    "label": "perSecond 正常值 → 应通过",
+    "entry": {
+      "modelId": "ai-video-to-video-standard",
+      "toolSlug": "ai-video-to-video",
+      "tierId": "standard",
+      "workerKind": "video-workers",
+      "falModel": "fal-ai/kling-video/o1/video-to-video/edit",
+      "schemaVersion": "1.5.0",
+      "handlerVersion": "v1",
+      "creditCost": { "type": "perSecond", "perSecond": 85 },
+      "params": [],
+      "maxDimension": 2160
+    },
+    "expectPass": true
+  },
+  {
+    "label": "perSecond perSecond ≤ 0 → 应失败",
+    "entry": {
+      "modelId": "bad",
+      "toolSlug": "t",
+      "tierId": "standard",
+      "workerKind": "video-workers",
+      "falModel": "fal-ai/x",
+      "schemaVersion": "1.5.0",
+      "handlerVersion": "v1",
+      "creditCost": { "type": "perSecond", "perSecond": 0 },
+      "params": [],
+      "maxDimension": 2160
+    },
+    "expectPass": false
   }
 ]

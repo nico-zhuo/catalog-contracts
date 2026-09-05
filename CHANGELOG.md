@@ -6,6 +6,45 @@ schemaVersion 变更记录。所有版本号遵循 [semver](https://semver.org/)
 
 ---
 
+## [1.5.0] - 2026-09-05
+
+### 变更类型：MINOR（CreditCostRule 加 union 成员，runtime 向后兼容）
+
+#### 背景
+
+video-workers 新工具 `ai-video-to-video`（Kling O 系列 v2v 编辑三档）成本按
+生成时长线性计费（fal 按 $/s 收费，3–10s 输入成本差 3 倍以上），fixed / perUnit
+均无法表达「按秒 × 连续时长」。
+
+#### 字段变更
+
+| 字段 | 改前（1.4.0） | 改后（1.5.0） |
+|---|---|---|
+| `CreditCostRule` | `fixed \| perUnit` | `fixed \| perUnit \| perSecond` |
+
+新成员：`{ type: "perSecond"; perSecond: number }`（正整数积分/秒）。
+
+#### 秒数来源契约
+
+- 计费秒数 = 输出视频时长（v2v 编辑模型输出时长 = 上传视频时长）
+- **BFF 权威计算**：BFF 从上传视频探测真实时长（不信任前端上报），向上取整到整秒
+- **前端展示用同函数**：上传组件本地读 `video.duration` 实时显示预估积分
+
+#### 兼容性
+
+- **Runtime**：纯加 union 成员，老 entry（fixed / perUnit）parse 行为不变
+- **TS type-level**：union 加成员，`switch (rule.type)` 穷尽处编译期强制补 case
+- **BFF**：需在积分计算函数补 perSecond case + schemaVersion 支持范围升到 `^1.5.0`
+- **前端**：积分展示函数补 perSecond case
+
+#### 部署顺序
+
+1. 本 PR（catalog-contracts v1.5.0）合并到 main
+2. video-workers bump submodule pointer + 部署 ai-video-to-video 三档
+3. BFF / 前端补 perSecond 计算 + 展示（不阻塞后端部署，未升级前该工具积分显示异常）
+
+---
+
 ## [1.4.0] - 2026-08-12
 
 ### 变更类型：MINOR（加可选字段 `outputFormat`，runtime 向后兼容）

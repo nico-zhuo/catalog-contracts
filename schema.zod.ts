@@ -26,6 +26,10 @@ export const CreditCostRuleSchema = z.discriminatedUnion("type", [
     paramRef: z.string().min(1),
     table: z.record(z.string(), z.number().int().nonnegative()),
   }),
+  z.object({
+    type: z.literal("perSecond"),
+    perSecond: z.number().int().positive(),
+  }),
 ]);
 
 /**

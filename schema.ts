@@ -17,10 +17,14 @@ export type WorkerKind = string;
  * - fixed:固定积分,如文生图 standard 档每次 10 积分
  * - perUnit:按某参数阶梯计费,如 TTS 按 charLimit:1000/2000/3000 三档
  *           perUnit 已覆盖原 perResolution 场景(paramRef 指向 "resolution" 即可)
+ * - perSecond:按生成时长(秒)线性计费,如 v2v 编辑类模型(1.5.0 引入)。
+ *           秒数来源 = 输出视频时长(= 上传视频时长,BFF 权威探测,
+ *           前端展示用同函数)。向上取整到整秒,保护毛利。
  */
 export type CreditCostRule =
   | { type: "fixed"; amount: number }
-  | { type: "perUnit"; paramRef: string; table: Record<string, number> };
+  | { type: "perUnit"; paramRef: string; table: Record<string, number> }
+  | { type: "perSecond"; perSecond: number };
 
 /**
  * 参数 schema —— discriminated union。
@@ -227,4 +231,4 @@ export interface WorkerCatalogEntry {
 }
 
 /** 当前 schema 版本,所有新 entry 必须用此值。 */
-export const CURRENT_SCHEMA_VERSION = "1.4.0";
+export const CURRENT_SCHEMA_VERSION = "1.5.0";
