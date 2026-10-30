@@ -6,6 +6,41 @@ schemaVersion 变更记录。所有版本号遵循 [semver](https://semver.org/)
 
 ---
 
+## [1.6.0] - 2026-10-30
+
+### 变更类型：MINOR（`CreditCostRule` fixed / perUnit 分支加可选字段 `surcharges`，runtime 向后兼容）
+
+#### 背景
+
+`google/nano-banana-2`（image-workers ai-text-to-image 新档）的 Web Search grounding
+是开关型增值能力：基础扣费按 resolution perUnit（1K 20 / 2K 30 / 4K 45），开启搜索
+需额外 +5 积分。fixed / perUnit 单维计费表达不了「基础价 + 开关加价」的叠加。
+
+#### 字段变更
+
+| 字段 | 改前（1.5.0） | 改后（1.6.0） |
+|---|---|---|
+| `CreditCostRule.surcharges` | — | `Array<{ paramRef: string; amount: number }>` optional（fixed / perUnit 均可带；perSecond 暂不需要，不开） |
+
+语义：入参中 `paramRef` 指到的参数取真值（boolean `true` / 非空字符串）时，
+基础扣费（fixed amount 或 perUnit table 命中值）逐项叠加 `amount`。
+
+#### 兼容性
+
+- **Runtime**：纯加 optional 字段，老 entry parse 行为不变。
+- **BFF**：扣费时 `entry.creditCost.surcharges?.forEach(...)`，老 entry 无该字段即不加价。
+- **前端**：展示总价时可读 surcharges 做开关联动计价；不读则忽略。
+- **约束**：`paramRef` 必须指向同一 entry `catalog.params` 里已暴露的参数，
+  否则「UI 看不到 ≠ API 调不到」（同 Param Exposure Principle）。
+
+#### 部署顺序
+
+1. 本 PR（catalog-contracts v1.6.0）合并到 main
+2. image-workers bump submodule pointer + 部署 nano-banana-2 档
+3. BFF 扣费函数 + 前端积分展示补 surcharges 叠加（未升级前按基础价展示/扣费，加价缺收）
+
+---
+
 ## [1.5.0] - 2026-09-05
 
 ### 变更类型：MINOR（CreditCostRule 加 union 成员，runtime 向后兼容）

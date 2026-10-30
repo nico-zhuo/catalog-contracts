@@ -16,15 +16,22 @@
 
 import { z } from "zod";
 
+export const CreditSurchargeSchema = z.object({
+  paramRef: z.string().min(1),
+  amount: z.number().int().nonnegative(),
+});
+
 export const CreditCostRuleSchema = z.discriminatedUnion("type", [
   z.object({
     type: z.literal("fixed"),
     amount: z.number().int().nonnegative(),
+    surcharges: z.array(CreditSurchargeSchema).optional(),
   }),
   z.object({
     type: z.literal("perUnit"),
     paramRef: z.string().min(1),
     table: z.record(z.string(), z.number().int().nonnegative()),
+    surcharges: z.array(CreditSurchargeSchema).optional(),
   }),
   z.object({
     type: z.literal("perSecond"),

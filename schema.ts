@@ -21,9 +21,25 @@ export type WorkerKind = string;
  *           秒数来源 = 输出视频时长(= 上传视频时长,BFF 权威探测,
  *           前端展示用同函数)。向上取整到整秒,保护毛利。
  */
+/**
+ * 叠加计价：某参数取真值（boolean true / 非空字符串）时，在基础扣费上额外加 amount。
+ * 用于「开关型增值能力」（如 web search grounding）的加价，1.6.0 引入。
+ */
+export interface CreditSurcharge {
+  /** catalog.params 里的参数名 */
+  paramRef: string;
+  /** 参数为真值时叠加的积分 */
+  amount: number;
+}
+
 export type CreditCostRule =
-  | { type: "fixed"; amount: number }
-  | { type: "perUnit"; paramRef: string; table: Record<string, number> }
+  | { type: "fixed"; amount: number; surcharges?: CreditSurcharge[] }
+  | {
+      type: "perUnit";
+      paramRef: string;
+      table: Record<string, number>;
+      surcharges?: CreditSurcharge[];
+    }
   | { type: "perSecond"; perSecond: number };
 
 /**
@@ -231,4 +247,4 @@ export interface WorkerCatalogEntry {
 }
 
 /** 当前 schema 版本,所有新 entry 必须用此值。 */
-export const CURRENT_SCHEMA_VERSION = "1.5.0";
+export const CURRENT_SCHEMA_VERSION = "1.6.0";
