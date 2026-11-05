@@ -20,6 +20,9 @@ export type WorkerKind = string;
  * - perSecond:按生成时长(秒)线性计费,如 v2v 编辑类模型(1.5.0 引入)。
  *           秒数来源 = 输出视频时长(= 上传视频时长,BFF 权威探测,
  *           前端展示用同函数)。向上取整到整秒,保护毛利。
+ * - perSecondMatrix:按秒 × 多维参数联合计价(1.7.0 引入),如 T2V 的
+ *           「每秒单价随分辨率 / 音频开关变化」。table key = 各 paramRef 值
+ *           按顺序用 "|" 连接,credits = ceil(durationSec) × table[key]。
  */
 /**
  * 叠加计价：某参数取真值（boolean true / 非空字符串）时，在基础扣费上额外加 amount。
@@ -40,7 +43,23 @@ export type CreditCostRule =
       table: Record<string, number>;
       surcharges?: CreditSurcharge[];
     }
-  | { type: "perSecond"; perSecond: number };
+  | { type: "perSecond"; perSecond: number }
+  | {
+      type: "perSecondMatrix";
+      /**
+       * 参与查表的参数名（顺序即 key 拼接顺序）。
+       *
+       * 每个 paramRef 必须指向同一 entry `catalog.params` 中已暴露的参数
+       * （zod superRefine 校验），否则「UI 看不到 ≠ API 调不到」。
+       */
+      paramRefs: string[];
+      /**
+       * 每秒积分表。key = paramRefs 各参数值按顺序用 "|" 连接，
+       * 例如 `paramRefs: ["resolution","audio"]` → `"1080p|on"`。
+       * 参数缺省时取 catalog.params 的 defaultValue。
+       */
+      table: Record<string, number>;
+    };
 
 /**
  * 参数 schema —— discriminated union。
@@ -247,4 +266,4 @@ export interface WorkerCatalogEntry {
 }
 
 /** 当前 schema 版本,所有新 entry 必须用此值。 */
-export const CURRENT_SCHEMA_VERSION = "1.6.0";
+export const CURRENT_SCHEMA_VERSION = "1.7.0";

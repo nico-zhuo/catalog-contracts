@@ -37,6 +37,11 @@ export const CreditCostRuleSchema = z.discriminatedUnion("type", [
     type: z.literal("perSecond"),
     perSecond: z.number().int().positive(),
   }),
+  z.object({
+    type: z.literal("perSecondMatrix"),
+    paramRefs: z.array(z.string().min(1)).min(1),
+    table: z.record(z.string(), z.number().int().positive()),
+  }),
 ]);
 
 /**
@@ -158,6 +163,41 @@ export const ModelCatalogEntrySchema = z.object({
       });
     }
   });
+  // refine #6:perSecondMatrix(1.7.0 引入)——
+  //   1) paramRefs 必须指向已暴露的 catalog.params(否则 UI 看不到但 API 能传)
+  //   2) table 不能为空
+  //   3) 每个 table key 的 "|" 段数 = paramRefs 数量(防止查表 key 拼错)
+  if (v.creditCost.type === "perSecondMatrix") {
+    // 闭包内 TS 会重置属性窄化，先落到局部常量
+    const rule = v.creditCost;
+    const exposed = new Set(v.params.map((p) => p.name));
+    rule.paramRefs.forEach((ref, i) => {
+      if (!exposed.has(ref)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["creditCost", "paramRefs", i],
+          message: `paramRefs[${i}] "${ref}" 未在 catalog.params 暴露`,
+        });
+      }
+    });
+    const keys = Object.keys(rule.table);
+    if (keys.length === 0) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["creditCost", "table"],
+        message: "perSecondMatrix 的 table 不能为空",
+      });
+    }
+    keys.forEach((key) => {
+      if (key.split("|").length !== rule.paramRefs.length) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["creditCost", "table", key],
+          message: `table key "${key}" 的段数与 paramRefs 数量不一致`,
+        });
+      }
+    });
+  }
 });
 
 export const WorkerCatalogEntrySchema = z.object({

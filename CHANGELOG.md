@@ -6,6 +6,68 @@ schemaVersion 变更记录。所有版本号遵循 [semver](https://semver.org/)
 
 ---
 
+## [1.7.0] - 2026-11-05
+
+### 变更类型：MINOR（`CreditCostRule` 加 union 成员 `perSecondMatrix`，runtime 向后兼容）
+
+#### 背景
+
+`ai-text-to-video` 换型为 replicate 模型后，单价同时随「分辨率」和「音频开关」变化：
+
+- `bytedance/seedance-1.5-pro`：480p/720p/1080p × 有声/无声 = 六格价（有声恒为无声的 2 倍）；
+- `kwaivgi/kling-v3-video`：standard/pro/4k × 音频开关，且 4k 档音频不加价（非统一倍率）；
+- `google/veo-3.1` / `veo-3.1-fast`：单价只随音频变，分辨率不影响；
+- 其余模型：单价只随分辨率变，音频免费。
+
+现有 `perSecond` 只有单一费率、`perUnit` 是「每次生成固定积分」，均无法表达
+「按秒 × 多维参数」的计价。
+
+#### 字段变更
+
+| 字段 | 改前（1.6.0） | 改后（1.7.0） |
+|---|---|---|
+| `CreditCostRule` | `fixed \| perUnit \| perSecond` | `fixed \| perUnit \| perSecond \| perSecondMatrix` |
+
+新成员：
+
+```ts
+{
+  type: "perSecondMatrix";
+  paramRefs: string[];              // 参与查表的参数，顺序即 key 拼接顺序
+  table: Record<string, number>;    // key → 每秒积分
+}
+```
+
+语义：
+
+- `key = paramRefs.map(ref => String(params[ref])).join("|")`，参数缺省时取
+  `catalog.params` 的 `defaultValue`；
+- `credits = ceil(durationSec) × table[key]`；
+- `durationSec` 由 BFF 注入（与 `perSecond` 同源），**不来自 `catalog.params`**。
+
+#### 校验（zod superRefine #6）
+
+1. `paramRefs` 非空；
+2. 每个 `paramRef` 必须指向同一 entry 的 `catalog.params` 已暴露参数；
+3. `table` 非空；
+4. 每个 table key 的 `|` 段数 = `paramRefs` 长度。
+
+#### 兼容性
+
+- **Runtime**：纯加 union 成员，老 entry parse 行为不变。
+- **BFF**：需补 `perSecondMatrix` 分支（`credit-cost.ts` 客户端展示 +
+  `credit-rules.ts` 服务端权威），未升级前该规则会落 unknown 分支。
+- **后端**：video-workers 新 handler 使用；其他 worker 零改动。
+- **video-workers vendor submodule 仍钉 1.5.0**：使用本成员前必须先升级到 1.7.0。
+
+#### 部署顺序
+
+1. 本 PR（catalog-contracts v1.7.0）合并到 main
+2. video-workers bump submodule → 14 个 T2V 档 deploy → sync 落 KV
+3. arui bump submodule → 映射 + 计价两处实现 → verify 通过后 deploy
+
+---
+
 ## [1.6.0] - 2026-10-30
 
 ### 变更类型：MINOR（`CreditCostRule` fixed / perUnit 分支加可选字段 `surcharges`，runtime 向后兼容）

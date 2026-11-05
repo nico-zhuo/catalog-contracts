@@ -200,5 +200,146 @@
       "maxDimension": 2160
     },
     "expectPass": false
+  },
+  {
+    "label": "perSecondMatrix 正常值 → 应通过",
+    "entry": {
+      "modelId": "ai-text-to-video-seedance-1-5-pro",
+      "toolSlug": "ai-text-to-video",
+      "tierId": "seedance-1-5-pro",
+      "workerKind": "video-workers",
+      "falModel": "bytedance/seedance-1.5-pro",
+      "schemaVersion": "1.7.0",
+      "handlerVersion": "v1",
+      "creditCost": {
+        "type": "perSecondMatrix",
+        "paramRefs": ["resolution", "audio"],
+        "table": {
+          "480p|off": 7,
+          "480p|on": 13,
+          "720p|off": 13,
+          "720p|on": 26,
+          "1080p|off": 30,
+          "1080p|on": 60
+        }
+      },
+      "params": [
+        {
+          "name": "resolution",
+          "type": "enum",
+          "labelKey": "params.resolution.label",
+          "options": [
+            { "value": "480p", "label": "480p" },
+            { "value": "720p", "label": "720p" },
+            { "value": "1080p", "label": "1080p" }
+          ],
+          "defaultValue": "720p"
+        },
+        {
+          "name": "audio",
+          "type": "enum",
+          "labelKey": "params.audio.label",
+          "options": [
+            { "value": "off", "labelKey": "params.audio.off" },
+            { "value": "on", "labelKey": "params.audio.on" }
+          ],
+          "defaultValue": "off"
+        }
+      ],
+      "maxDimension": 1920
+    },
+    "expectPass": true
+  },
+  {
+    "label": "perSecondMatrix paramRefs 为空 → 应失败",
+    "entry": {
+      "modelId": "bad",
+      "toolSlug": "t",
+      "tierId": "standard",
+      "workerKind": "video-workers",
+      "falModel": "fal-ai/x",
+      "schemaVersion": "1.7.0",
+      "handlerVersion": "v1",
+      "creditCost": { "type": "perSecondMatrix", "paramRefs": [], "table": { "x": 10 } },
+      "params": [],
+      "maxDimension": 2160
+    },
+    "expectPass": false
+  },
+  {
+    "label": "perSecondMatrix table 为空 → 应失败",
+    "entry": {
+      "modelId": "bad",
+      "toolSlug": "t",
+      "tierId": "standard",
+      "workerKind": "video-workers",
+      "falModel": "fal-ai/x",
+      "schemaVersion": "1.7.0",
+      "handlerVersion": "v1",
+      "creditCost": { "type": "perSecondMatrix", "paramRefs": ["resolution"], "table": {} },
+      "params": [
+        {
+          "name": "resolution",
+          "type": "enum",
+          "labelKey": "x",
+          "options": [{ "value": "720p", "label": "720p" }]
+        }
+      ],
+      "maxDimension": 2160
+    },
+    "expectPass": false
+  },
+  {
+    "label": "perSecondMatrix table key 段数不匹配 → 应失败",
+    "entry": {
+      "modelId": "bad",
+      "toolSlug": "t",
+      "tierId": "standard",
+      "workerKind": "video-workers",
+      "falModel": "fal-ai/x",
+      "schemaVersion": "1.7.0",
+      "handlerVersion": "v1",
+      "creditCost": {
+        "type": "perSecondMatrix",
+        "paramRefs": ["resolution", "audio"],
+        "table": { "720p": 20 }
+      },
+      "params": [
+        {
+          "name": "resolution",
+          "type": "enum",
+          "labelKey": "x",
+          "options": [{ "value": "720p", "label": "720p" }]
+        },
+        {
+          "name": "audio",
+          "type": "enum",
+          "labelKey": "y",
+          "options": [{ "value": "off", "labelKey": "y.off" }]
+        }
+      ],
+      "maxDimension": 2160
+    },
+    "expectPass": false
+  },
+  {
+    "label": "perSecondMatrix paramRef 未在 catalog.params 暴露 → 应失败",
+    "entry": {
+      "modelId": "bad",
+      "toolSlug": "t",
+      "tierId": "standard",
+      "workerKind": "video-workers",
+      "falModel": "fal-ai/x",
+      "schemaVersion": "1.7.0",
+      "handlerVersion": "v1",
+      "creditCost": {
+        "type": "perSecondMatrix",
+        "paramRefs": ["resolution"],
+        "table": { "720p": 20 }
+      },
+      "params": [],
+      "maxDimension": 2160
+    },
+    "expectPass": false
   }
 ]
