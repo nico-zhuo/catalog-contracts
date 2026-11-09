@@ -243,3 +243,39 @@
   - **A（推荐）**：卡片上方一条 logo 带 + "62 models · 14 model labs · 128 tools · All available on every plan" —— 最省空间、不虚构差异；
   - **B**：每张卡内嵌同一组 logo 行（"Works with all 62 models"）—— 更醒目、但三卡重复、卡片变高。
 - 将来 P7（Pro/Ultra 门禁）上线后，可升级为"高级模型：Pro/Ultra 可用"的分档表达。
+
+
+---
+
+## 9. 排序与复用约束（2026-11-09 23:28 用户澄清）
+
+**用户原话**：门禁是打算做了这个（定价页）再做的，因为已经区分好高级模型了，free 用不了高级模型；free 用户点高级模型生成、哪怕积分够也会弹窗；**弹窗直接复用定价页的 plan**。
+
+### 9.1 结论：本批必须"可复用化"，不能写死
+| 要求 | 含义 |
+|---|---|
+| 顺序 | **先做定价页 Plan 卡片改版（本批）→ 再做门禁 + 弹窗（下一批）** |
+| Free 用不了高级模型 | 门禁上线后：Free 选中 premium 档点生成 → 弹窗（不看积分是否够） |
+| 弹窗复用定价页 plan | 本次改版必须把 **PlanCard / PlanCardList 抽成独立组件**，并把 checkout 逻辑抽成 hook（`/api/checkout`、`/api/subscription-change`、`/api/portal-upgrade`、`/api/credits-purchase` 都在 `pricing-section.tsx` 内），否则弹窗复用时会复制一份结算逻辑 → 必然漂移 |
+
+### 9.2 建议的组件边界（本批 P2 范围）
+- `components/billing/plan-card.tsx`：纯展示（plan 数据 + 权益行 + tooltip + 角标 + 黑白/亮绿样式 + CTA 插槽/回调），**不含数据请求**；
+- `components/billing/plan-card-list.tsx`：三卡布局（3 列 → 移动端单列），支持 `variant="page" | "modal"`（modal 更紧凑，可只显示付费两卡）；
+- `hooks/use-plan-checkout.ts`：把 checkout / 降级 / 年付升级 / 一次性积分包 / 结果弹窗的状态与请求抽出来；
+- `pricing-section.tsx`：只做组合（标题、月年切换、One-Time Points tab、对比表、FAQ、错误提示）；
+- 下一批的门禁弹窗直接 `<PlanCardList variant="modal" />` + 同一个 `usePlanCheckout`。
+
+### 9.3 ⚠️ 连带修订：模型 logo 文案不要写"所有档都能用"
+门禁上线后 Free 用不了高级模型，所以：
+- 现在**不要**在 logo 条写 "All available on every plan"（会变成假话）；
+- 先用中性表述：`62 models · 14 model labs · 128 tools`；
+- 门禁上线后在同一位置加一句 `Advanced models included with Pro and Ultra`（本期先不写，留好位置）。
+
+### 9.4 本批不做（等门禁批）
+- Free 点高级模型 → 弹窗（需要 P7 门禁：BFF 403 `PREMIUM_PLAN_REQUIRED` + 客户端拦截 + 复用本批 PlanCardList）
+- 客户端的模型档与用户档位判断
+
+### 9.5 仍待确认
+1. logo 摆法 **A（页面级条）/ B（卡内行）**？
+2. "标签用亮绿色" 是否也包括把模型面板 PREMIUM 徽标改回亮绿？
+3. Free 的 `Watermark on outputs` 是否真实（免费版确实加水印）？
