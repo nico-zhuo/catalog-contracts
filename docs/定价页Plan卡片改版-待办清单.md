@@ -1,6 +1,6 @@
 # 定价页 Plan 卡片改版（对标竞品布局 · 保持黑白 + 事实）· 待办清单（2026-11-09）
 
-> 状态：**只读检查完成 + 版式示例稿已出（未执行任何代码改动）**。示例稿：`docs/pricing-cards-mock-v2-2026-11-09.png`（v1 已删除）。
+> 状态：**只读检查完成 + 版式示例稿已出（未执行任何代码改动）**。示例稿：`docs/pricing-cards-mock-v3-2026-11-09.png`（v1/v2 已删除）。
 > 依据：用户提供的竞品定价页截图（Pro $20 / Ultimate $40 / Max $80，三卡 + 模型权益块 + 折扣 logo 条 + 带 ? 的权益列表）+ 4 张 tooltip 截图。
 > 三条口径：① 价格不动 ② 我们没有"免费无限使用的模型"，该块不上 ③ 布局尽量一致，颜色改黑白主题。
 
@@ -233,7 +233,7 @@
 | 反馈 | 处理 |
 |---|---|
 | Free 的「每日 10 张快速图片」删除 | ✅ 已删；Free 现为 5 行：10 credits/day · 1 concurrent · Standard queue · Watermark on outputs · ✗ Commercial license |
-| 竞品卡上有模型图标，示例没有，影响转化 | ✅ 已补；两种摆法见 v2 示例稿 **A（页面级 logo 条）/ B（卡内 logo 行）**，待你选 |
+| 竞品卡上有模型图标，示例没有，影响转化 | ✅ 已补：**A 页面级 logo 条**（用户 23:28 选定） |
 | 旧示例删除 | ✅ `pricing-cards-mock-2026-11-09.png` 已删，新稿 `pricing-cards-mock-v2-2026-11-09.png` |
 
 ### 8.1 模型图标检查结论
@@ -279,3 +279,36 @@
 1. logo 摆法 **A（页面级条）/ B（卡内行）**？
 2. "标签用亮绿色" 是否也包括把模型面板 PREMIUM 徽标改回亮绿？
 3. Free 的 `Watermark on outputs` 是否真实（免费版确实加水印）？
+
+
+---
+
+## 10. 用户反馈 · 示例稿 v3（2026-11-09 23:40）
+
+| # | 反馈 | 处理 |
+|---|---|---|
+| 1 | logo 摆法按推荐 | ✅ **A 页面级 logo 条**（16 个厂商 logo 一横排 + "62 models · 14 model labs · 128 tools"） |
+| 2 | PREMIUM 徽标**不改回亮绿** | ✅ 模型面板 PREMIUM 徽标保持黑白翻转（上一批成果保留）；定价页只用亮绿角标 |
+| 3 | Free 也没有水印 | ✅ **三张卡全部删掉水印行**（Free 的 "Watermark on outputs"、Pro/Ultra 的 "No watermarks"），改为 logo 条下的页面级事实说明 **"No watermarks on any plan"** |
+
+### 10.1 v3 卡片最终文案
+- **Free**（4 行）：10 credits per day · 1 concurrent generation · Standard queue · ✗ Commercial license
+- **Pro**（6 行）：2,000 credits per month · Up to 2,000 fast images · Up to 125 basic videos · 2 concurrent generations · Priority queue · Commercial license
+- **Ultra**（7 行）：5,000 credits per month · Up to 5,000 fast images · Up to 312 basic videos · 4 concurrent generations · Highest priority queue · Commercial license · Buy extra credits anytime
+- 页面级：`62 models · 14 model labs · 128 tools` + `No watermarks on any plan`
+- 角标：Ultra 右上亮绿 `Recommended`；CTA 黑底白字；价格不动
+
+### 10.2 ⚠️ 检查发现的连带问题：全站「水印」文案与事实不符
+既然"Free 也没有水印"，以下现有文案是**假话**，需要单独清理（不在定价页改动范围内）：
+
+| 位置 | 现文案 | 问题 |
+|---|---|---|
+| `locales/en/settings.json` 套餐权益 | "Watermark included (free plan). Upgrade to remove." | 明确错误 |
+| `locales/en/ai-image-generator.json` FAQ | "the only difference is a watermark on output files, which is removed when you upgrade to Pro" | 错误 |
+| `locales/en/ai-video-generator.json` FAQ | 同上（升级去除水印） | 错误 |
+| `locales/en/ai-3d-model-generator.json` FAQ | "upgrading simply raises your daily limit and removes watermarks" | 错误 |
+| `locales/en/photo-to-animation.json`（2 处）、`image-to-video.json`（2 处）、`text-to-video.json` | "removes watermarks / upgrade to remove watermarks" | 错误 |
+| 其余 ~15 个 en 文件 | "no watermark / watermark-free" 类表述 | **正确**，保留 |
+
+- 规模：`locales/en/` 有 **7 个文件**含错误表述；全站 32 语里 `watermark` 出现在 **117 个文件**（多数是"无水印"正确表述）。
+- 建议：作为**独立批次 P7'（文案纠偏）**处理：改 en 源 7 处 → 32 语同步（机翻 + 人工抽查），并同步 settings 页套餐权益表。
