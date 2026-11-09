@@ -1,6 +1,6 @@
 # 定价页 Plan 卡片改版（对标竞品布局 · 保持黑白 + 事实）· 待办清单（2026-11-09）
 
-> 状态：**只读检查完成 + 版式示例稿已出（未执行任何代码改动）**。示例稿：`docs/pricing-cards-mock-2026-11-09.png`。
+> 状态：**只读检查完成 + 版式示例稿已出（未执行任何代码改动）**。示例稿：`docs/pricing-cards-mock-v2-2026-11-09.png`（v1 已删除）。
 > 依据：用户提供的竞品定价页截图（Pro $20 / Ultimate $40 / Max $80，三卡 + 模型权益块 + 折扣 logo 条 + 带 ? 的权益列表）+ 4 张 tooltip 截图。
 > 三条口径：① 价格不动 ② 我们没有"免费无限使用的模型"，该块不上 ③ 布局尽量一致，颜色改黑白主题。
 
@@ -224,3 +224,22 @@
 ### 7.5 实施范围（待授权）
 - 只改 `app/components/marketing/pricing-section.tsx`（卡片版式 + 黑白 + 亮绿角标/标签）+ `app/config/pricing.ts`（如需内嵌 feature 表）+ i18n `pricing` 命名空间新增 key
 - **不动**：价格、Stripe planId、JSON-LD 价格、对比表、FAQ、一次性积分包、月年切换逻辑
+
+
+---
+
+## 8. 用户反馈 · 示例稿 v2（2026-11-09 23:11）
+
+| 反馈 | 处理 |
+|---|---|
+| Free 的「每日 10 张快速图片」删除 | ✅ 已删；Free 现为 5 行：10 credits/day · 1 concurrent · Standard queue · Watermark on outputs · ✗ Commercial license |
+| 竞品卡上有模型图标，示例没有，影响转化 | ✅ 已补；两种摆法见 v2 示例稿 **A（页面级 logo 条）/ B（卡内 logo 行）**，待你选 |
+| 旧示例删除 | ✅ `pricing-cards-mock-2026-11-09.png` 已删，新稿 `pricing-cards-mock-v2-2026-11-09.png` |
+
+### 8.1 模型图标检查结论
+- 资产现成：`public/brand/*.svg` 共 20 个厂商 logo（seedream / google / openai / flux / kuaishou / minimax / bytedance / alibabacloud / xai / elevenlabs / inworld / qwen / stability-ai / recraft / bria / tencent / topaz / hyper3d / pruna-ai / resemble-ai）。
+- 事实：62 个模型档 / 14+ 家模型厂商 / 128 个工具，**所有档都能用全部模型**（premium 门禁 P7 尚未上线）。
+- **不能照抄竞品的"分档模型权益表"**（他们靠 Unlimited/折扣做差异）；我们只能做"全档同等可用"的表达：
+  - **A（推荐）**：卡片上方一条 logo 带 + "62 models · 14 model labs · 128 tools · All available on every plan" —— 最省空间、不虚构差异；
+  - **B**：每张卡内嵌同一组 logo 行（"Works with all 62 models"）—— 更醒目、但三卡重复、卡片变高。
+- 将来 P7（Pro/Ultra 门禁）上线后，可升级为"高级模型：Pro/Ultra 可用"的分档表达。
