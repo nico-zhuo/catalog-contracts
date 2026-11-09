@@ -21,7 +21,7 @@
 
 ## 1. 检查结果
 
-### 1.1 默认档还是 flux-schnell 的工具：26 个（共 128）
+### 1.1 默认档还是 flux-schnell 的工具：26 个（共 128）—— **2026-11-09 22:00 已全部改为 Seedream 4.0**（arui `df61614a4`，本地已提交、**未推送**）
 
 **共同特征**：都是 17 档全池、默认档 `flux-schnell`（1 积分、**非 premium**）；上一批只把 3 个签名工具从 flux-schnell 换成了 Seedream 4.0，其余当时未授权，保持不动。
 
@@ -32,6 +32,12 @@
 | 设计 / 图标 | 4 | ai-logo-maker、ai-icon-generator、ai-vector-generator、ai-coloring-book-generator |
 | 图表 | 9 | ai-org-chart-maker、ai-er-diagram-generator、ai-data-flow-diagram-maker、ai-uml-diagram-generator、ai-spider-chart-maker、ai-architecture-diagram-generator、ai-flow-chart-maker、ai-hierarchy-chart-maker、ai-mind-map-generator |
 | 其它 | 2 | ai-album-cover-generator、ai-wallpaper-generator |
+
+> **执行结果（2026-11-09 22:00）**：26 个工具的 `defaultModelId` 全部 `flux-schnell → seedream-4`（26 行，仅 `app/config/canvas-tools.ts`）。
+> - 默认积分 **1 → 9**（Seedream 4.0 固定 9），默认分辨率 1K → 2K，全部 premium（面板带 PREMIUM 徽标）
+> - 校验：101 个 seedream-4 默认档全部能在线上 catalog 命中（0 问题）；`typecheck` / `build` / `verify:premium` 全绿
+> - 提交：`df61614a4`（**未 push**，等后续一起推）
+> - 口径说明：这 26 个工具页的 16 个 premium 档里，默认积分 <10 的只有 6 个（gpt-image 系列 4 / flux-3-image 7 / flux-2-pro 9 / seedream-4 9）；其中 flux-2-pro 存在「面板显示最低价 7、默认参数实际 9」的偏差，Seedream 4.0 无此问题，故选定它。
 
 **若要换 premium，可选项（线上 catalog 实测）**
 - 全工具最低价 premium：`gpt-image-1-5`（4 积分）— 26 个工具全部可用
