@@ -1,6 +1,6 @@
 # 定价页 Plan 卡片改版（对标竞品布局 · 保持黑白 + 事实）· 待办清单（2026-11-09）
 
-> 状态：**只读检查完成 + 版式示例稿已出（未执行任何代码改动）**。示例稿：`docs/pricing-cards-mock-v5-2026-11-09.png`（v1–v4 已删除）。最终：**B 案 + 图标带品牌名 + 文案“Upgrade to unlock all advanced models”**。
+> 状态：**只读检查完成 + 版式示例稿已出（未执行任何代码改动）**。示例稿：`docs/pricing-cards-mock-v6-2026-11-09.png`（v1–v5 已删除）。最终：**B 案 + 图标带品牌名 + 彩色图标 + 文案“Upgrade to unlock all advanced models”**。
 > 依据：用户提供的竞品定价页截图（Pro $20 / Ultimate $40 / Max $80，三卡 + 模型权益块 + 折扣 logo 条 + 带 ? 的权益列表）+ 4 张 tooltip 截图。
 > 三条口径：① 价格不动 ② 我们没有"免费无限使用的模型"，该块不上 ③ 布局尽量一致，颜色改黑白主题。
 
@@ -362,3 +362,31 @@
 两种上线顺序：
 - **A（推荐）**：门禁 + 定价页同一批上线（先做门禁代码，再一起发）；
 - **B**：定价页先上，但这句话先不写（保持中性文案），门禁上线后再补——否则是虚假承诺。
+
+
+---
+
+## 13. 用户反馈 · 示例稿 v6（2026-11-10 08:20）
+
+**决定：换官方彩色 logo（方案 1）**。v5 已删除，v6 = 彩色示意版。
+
+### 13.1 检查：彩色 logo 要怎么换、换多少
+| 项 | 结论 |
+|---|---|
+| 需替换的资产 | **18 个**（`public/brand/*.svg` 里除 `google.svg` / `seedream.svg` 外的全部；现在统一 `#9CA3AF` 单色） |
+| 影响面 | 1 处资产 → 2 处消费：**模型选择面板**（`model-branding.ts` icon）+ **定价页卡内模型块**；换完两边同时变彩色 |
+| 官方本身是单色的 | OpenAI、xAI（Grok）、ElevenLabs、FLUX（BFL）官方就是黑色单色 → “彩色”在这里 = **品牌色**，不是彩虹色 |
+| 需要多色的 | Google（已有彩色）、Seedream（已有彩色）、Kling（Kuaishou 橙）、Seedance（ByteDance 蓝）、Wan（阿里橙）、Qwen（紫）、Stability（紫）、Tencent（蓝）、Topaz（蓝）、MiniMax（红）、Inworld（靛蓝）、Bria（橙红）、Recraft（黑）、Hyper3D（橙）、Pruna（紫）、Resemble（靛蓝）、Alibaba（橙） |
+| 来源 | 各厂商官方品牌页 / media kit；**需确认商标使用规范**（第三方 logo 展示通常允许"指明品牌"用途，但需按各自 policy） |
+
+> v6 示例稿里的彩色是**把现有单色 SVG 按品牌主色着色**做的示意（形状未变），正式上线要换官方彩色资产（形状也会变成官方 mark）。
+
+### 13.2 实现建议（换资产时）
+1. 18 个 SVG 放 `public/brand/`，文件名不变（覆盖即可，`model-branding.ts` 一行不用改）；
+2. 加一条守卫（建议）`scripts/verify-brand-assets.ts`：20 个 SVG 不得以 `#9CA3AF` 单色为唯一 fill（防回退成黑白）；并检查 `model-branding.ts` 引用的路径都存在；
+3. 换完跑 `pnpm build`，肉眼确认模型面板 + 定价页两处彩色一致；
+4. 图标尺寸统一 24×24 viewBox、无文字、浅色/深色面板都能看清（当前面板是深色，注意浅色系 logo 的对比度：如 Qwen 紫、Tencent 蓝在深色底上要加白色圆角底）。
+
+### 13.3 仍未定
+1. **上线顺序**：门禁与定价页是否同批上线？（"Upgrade to unlock all advanced models" 依赖门禁）
+2. 18 个官方彩色 SVG 的**来源**：你/设计给资产，还是我按各厂商品牌页抓取后给你审？
