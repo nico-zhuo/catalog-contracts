@@ -1,6 +1,6 @@
 # 定价页 Plan 卡片改版（对标竞品布局 · 保持黑白 + 事实）· 待办清单（2026-11-09）
 
-> 状态：**只读检查完成 + 版式示例稿已出（未执行任何代码改动）**。示例稿：`docs/pricing-cards-mock-v4-2026-11-09.png`（v1/v2/v3 已删除）。最终采用 **B 案：模型图标放进每张订阅卡内部**。
+> 状态：**只读检查完成 + 版式示例稿已出（未执行任何代码改动）**。示例稿：`docs/pricing-cards-mock-v5-2026-11-09.png`（v1–v4 已删除）。最终：**B 案 + 图标带品牌名 + 文案“Upgrade to unlock all advanced models”**。
 > 依据：用户提供的竞品定价页截图（Pro $20 / Ultimate $40 / Max $80，三卡 + 模型权益块 + 折扣 logo 条 + 带 ? 的权益列表）+ 4 张 tooltip 截图。
 > 三条口径：① 价格不动 ② 我们没有"免费无限使用的模型"，该块不上 ③ 布局尽量一致，颜色改黑白主题。
 
@@ -334,3 +334,31 @@
 
 ### 11.3 执行前剩余确认
 - 无阻塞项；可直接进入实现（PlanCard / PlanCardList / usePlanCheckout 组件化 + i18n 文案）。
+
+
+---
+
+## 12. 用户反馈 · 示例稿 v5（2026-11-10 08:00）
+
+| # | 反馈 | 处理 |
+|---|---|---|
+| 1 | 卡内文案改为「升级以解锁所有高级模型」 | ✅ 改为 `Upgrade to unlock all advanced models` |
+| 2 | 布局同截图：图标 + **品牌名在图标下方** | ✅ 2 行 × 5 个（MiniMax / Nano / GPT / Seedream / Veo / Seedance / Kling / Grok / Wan / FLUX），图标 44px、名字 10px 居中 |
+| 3 | 我们的图标怎么全是黑白的 | ⚠️ 检查结论见 §12.1 —— 资产本身的问题 |
+
+### 12.1 图标颜色检查（为什么全黑白）
+- `public/brand/*.svg` 共 20 个，逐个解析 fill：
+  - **彩色（4 个 fill 有饱和度）**：`google.svg`、`seedream.svg`
+  - **单色灰（18 个）**：其余全部使用同一个 `#9CA3AF`（alibabacloud / bytedance / elevenlabs / flux / kuaishou / minimax / openai / qwen / stability-ai / tencent / topaz / xai / bria / hyper3d / inworld / pruna-ai / recraft / resemble-ai）
+- 这不是渲染问题，是**资产本身就是单色占位风格**（当年为统一深色面板做的）。
+- 三个方案：
+  1. **换官方彩色 logo 资产（推荐）**：需补 18 个 SVG（来源 = 各厂商官方品牌页/品牌规范），注意商标使用规范与授权；模型面板、定价页会一起变彩色；
+  2. **折中：品牌色淡底 + 单色 logo**（示例稿底部已示意）——视觉更齐，但不是官方彩色；
+  3. 保持现状（单色）——与竞品对比吃亏，但零成本。
+- 影响范围：`model-branding.ts` 的 icon 路径 + `public/brand/*.svg`，改完模型选择面板和定价页同时生效（1 处资产、2 处消费）。
+
+### 12.2 ⚠️ 文案与真实性的时间差（必须定顺序）
+「Upgrade to unlock all advanced models」只有在**门禁上线后**才成立。当前 Free 用户也能用高级模型（门禁 P7 未做）。
+两种上线顺序：
+- **A（推荐）**：门禁 + 定价页同一批上线（先做门禁代码，再一起发）；
+- **B**：定价页先上，但这句话先不写（保持中性文案），门禁上线后再补——否则是虚假承诺。
