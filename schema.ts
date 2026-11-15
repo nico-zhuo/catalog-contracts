@@ -25,8 +25,11 @@ export type WorkerKind = string;
  *           按顺序用 "|" 连接,credits = ceil(durationSec) × table[key]。
  */
 /**
- * 叠加计价：某参数取真值（boolean true / 非空字符串）时，在基础扣费上额外加 amount。
- * 用于「开关型增值能力」（如 web search grounding）的加价，1.6.0 引入。
+ * 叠加计价：某参数取真值（boolean true / 非空字符串 / **非空数组**，2026-11-16 明确化）时，
+ * 在基础扣费上额外加 amount。
+ * 用于「开关型增值能力」（如 web search grounding）与「按张收紧的参考图近似加价」
+ * （如 gpt 系 image_urls ≤1 张 +3 积分，2026-11-16 N1）的加价，1.6.0 引入。
+ * ⚠️ amount 与数组长度无关：传 1 张与传 N 张加价相同，按张浮动需收紧张数配合。
  */
 export interface CreditSurcharge {
   /** catalog.params 里的参数名 */

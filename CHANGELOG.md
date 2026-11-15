@@ -6,6 +6,26 @@ schemaVersion 变更记录。所有版本号遵循 [semver](https://semver.org/)
 
 ---
 
+## [1.7.1] - 2026-11-16
+
+### 变更类型：注释级修订（**schemaVersion 不变，仍为 1.7.0**；无任何结构/校验变更）
+
+#### 背景
+
+`CreditSurcharge` 真值语义原文只写了「boolean true / 非空字符串」，**数组未定义**。
+gpt 系 4 档暴露参考图（image_urls，file 型，BFF 实传 `string[]`）+ surcharges +3 积分
+（2026-11-16 拍板 N1）时发现：arui 两侧扣费实现（client `credit-cost.ts` /
+server `credit-rules.ts`）逐字同构地漏判数组——非空数组不触发加价 → 每笔带图生成漏收。
+
+#### 修订内容
+
+- `schema.ts` `CreditSurcharge` 注释：真值定义补「**非空数组**」，并注明
+  「amount 与数组长度无关，按张浮动需收紧张数配合」。
+- 同批配套（非本仓）：arui 两侧真值判定加 `Array.isArray(v) && v.length > 0` 分支
+  + credit 真值单测 harness；image-workers gpt 4 档 v3 建模。
+
+---
+
 ## [1.7.0] - 2026-11-05
 
 ### 变更类型：MINOR（`CreditCostRule` 加 union 成员 `perSecondMatrix`，runtime 向后兼容）
