@@ -36,6 +36,13 @@ export interface CreditSurcharge {
   paramRef: string;
   /** 参数为真值时叠加的积分 */
   amount: number;
+  /**
+   * 数组参数按元素数乘 amount（1.8.0 引入）：非空 image_urls 传 N 张 → +amount×N。
+   * 非数组参数（boolean/enum）忽略此标志，行为与 1.6.0 一致。
+   * 依据：2026-11-16 NB2.1 受控实测（参考图按张 token 计费、图越大越贵）+
+   * 恢复各模型原生参考图上限（3/14）的按张计价需求。
+   */
+  perItem?: boolean;
 }
 
 export type CreditCostRule =

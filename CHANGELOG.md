@@ -6,6 +6,28 @@ schemaVersion 变更记录。所有版本号遵循 [semver](https://semver.org/)
 
 ---
 
+## [1.8.0] - 2026-11-16
+
+### 变更类型：MINOR（`CreditSurcharge` 加可选 `perItem`，runtime 向后兼容：缺省=false 行为与 1.7.x 一致）
+
+#### 背景
+
+2026-11-16 NB2.1 受控实测（§12.5）证实：Google 系参考图**按张、按图大小（768² tile×280 tok）计费**，
+固定额 surcharges 无法随张数缩放——这导致参考图上限被迫一刀切收紧到 1 张（用户已否决该做法）。
+
+#### 字段变更
+
+| 字段 | 改前（1.7.x） | 改后（1.8.0） |
+|---|---|---|
+| `CreditSurcharge` | `{paramRef, amount}` | `{paramRef, amount, perItem?}` |
+
+- `perItem: true` 且参数为非空数组时：加价 = `amount × 数组长度`（如 image_urls 3 张 → +amount×3）。
+- 非数组参数（boolean/enum）忽略该标志（1.6.0 语义不变）。
+- 配套（非本仓）：arui 两侧计价实现（credit-cost.ts / credit-rules.ts）同批支持；
+  image-workers NB 5 档 + grok 恢复原生素张数并按张计价。
+
+---
+
 ## [1.7.1] - 2026-11-16
 
 ### 变更类型：注释级修订（**schemaVersion 不变，仍为 1.7.0**；无任何结构/校验变更）

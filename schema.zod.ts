@@ -19,6 +19,8 @@ import { z } from "zod";
 export const CreditSurchargeSchema = z.object({
   paramRef: z.string().min(1),
   amount: z.number().int().nonnegative(),
+  // 数组参数按元素数乘 amount（1.8.0）；非数组参数忽略，缺省行为与 1.6.0 一致
+  perItem: z.boolean().optional(),
 });
 
 export const CreditCostRuleSchema = z.discriminatedUnion("type", [
