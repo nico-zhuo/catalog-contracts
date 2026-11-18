@@ -45,5 +45,35 @@
 
 波0 探针(T1)→ 波1 拍板 D-1~D-4 → 波2 backend T2 + frontend T3 并行备好 hold → 波3 探针绿→ arui 先行 push(#4 时序)→ image-workers push(KV 自动翻转)→ 波4 Lead 收口 T4。
 
+## 五、Replicate 改道版检查终态与执行清单(2026-11-18 09:1x,检查完毕,未执行)
+
+> 用户指令:Google/GPT 用 Replicate 平台 → 本节为改道后的落地检查;§一~§四中与 OR 模板/实测表相关的条目以本节为准。
+
+### 5.1 新增检查结论
+
+1. **模板就在本仓现役**:id-photo / passport / headshot / photo-enhancer 系 30+ 档 google/gpt Replicate handler = 老 t2i Replicate 档的逐字移植,注释明写「复用 ai-text-to-image-xxx 的上游与参数契约」「积分与 ai-text-to-image-xxx 一致」——**上游 slug / version hash / 参数契约 / 计价数字全套现成**,无需从 git 历史 checkout。工厂:`createReplicateImageHandler`(`src/shared/replicate-image-handler.ts`)。
+2. **9 档上游在 Replicate 全部可用**(API 实拉 2026-11-18 09:17,REPLICATE_KEY):
+   - nano-banana 系 5:`google/nano-banana` / `-2` / `-2.1` / `-2-lite` / `-pro`(仓内现役引用 ×6)
+   - gpt 系 4:`openai/gpt-image-2.5-flare` / `2.6-sunburst` / `2.6-flare` 均 **200**(仓内无先例,T2 需新拉 version hash + billingConfig);`gpt-image-2.5-sunburst` 现役 ×6
+3. **branding canonical 前身条目确认仍在**(arui `model-branding.ts:299-350`:`arui-ai-text-to-image-nano-banana` 系 5 条 + gpt 系)——前端 branding 零新增,直接复用。
+4. **命名空间**:t2i 的 google/gpt 旧 id 两代均已烧毁(Replicate 代 deleted 于换源批 C;`-or` 代 deleted 于 a3b722d)→ **9 档全部需要全新尾段**。仓内无 Replicate 换源后缀先例,新约定待定(建议 `-rp`,如 `nano-banana-2-1-rp` / `gpt-image-2-5-sunburst-rp`;点号→短横线照抄先例)。
+5. **计价口径**:沿用 Replicate 现役先例(gpt perUnit(quality) 如 4/14/38;nano-banana-2-1 perUnit(resolution) {1K:12,2K:21,4K:48}——注意 id-photo 注释是 12/21/48,与 18 档清单旧引 11/16/35 不同版本,**以现役 handler 为准**);gpt 2.5-flare / 2.6 两对四档**无先例数字**,T2 必须先读 Replicate billingConfig(踩坑 #6 metric 准入)再定价。
+6. **混合上游工具页**:ai-text-to-image 现为 OR 池工具,新 9 档是 Replicate 上游 → 前端池白名单 / model-selection 需确认能否挂 Replicate 档(84 工具 REPLICATE_TIER_TOOL_SLUGS 表不含 t2i),**这是本批最可能的前端结构风险点**。
+
+### 5.2 执行清单(波次)
+
+- **波1 backend(T2=task-3)**:9 档新 handler(模板 = 现役 id-photo 系同上游档;`createReplicateImageHandler`;新尾段按 N-1)→ gpt 2.5-flare/2.6×2 先拉 version+billingConfig 定价 → 门禁(registry 1442→1451 / guard / typecheck / tests)→ 本地 hold。
+- **波2 frontend(T3=task-4)**:mapping 9 行 + branding 复用核验 + IMAGE_ASYNC_MODEL_IDS 9 行(P0) + TEXT_STRENGTH + canvas-tools + 池白名单/model-selection 挂载方案(§5.1.6) + 断言按 24 档重算 → hold。
+- **波3**:arui 先行 push(#4 时序)→ image-workers push(KV 自动翻转)。
+- **波4 Lead(T4=task-1)**:KV snapshot 对账(1451/零孤儿)+ 本文档回填终态 + 踩坑/CHANGELOG 视需要。
+
+### 5.3 新决策点(N 组)
+
+| # | 项 | 建议 |
+|---|---|---|
+| N-1 | 9 档新尾段命名 | 建议 `-rp` 后缀(与 `-or` 对称,一眼可辨上游);待拍板 |
+| N-2 | gpt 2.5-flare / 2.6×2 计价 | T2 读 billingConfig 后按 ×300 换算,页价锚点缺失时标 `≈` 待首账单回填(#11) |
+| N-3 | 混合上游挂载 | 若池白名单结构不允许,回退方案 = 显式表行(先例:数字段显式表) |
+
 ---
-*创建:Lead 2026-11-18 09:08;状态:检查完毕,待 D 组拍板,未执行。*
+*创建:Lead 2026-11-18 09:08;改道修订 09:13;改道落地检查 09:18。状态:检查完毕,待 N 组拍板,未执行。*
