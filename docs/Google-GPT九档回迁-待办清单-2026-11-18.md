@@ -83,7 +83,18 @@
 | 波1 backend | image-workers `bd15418`:9 档 `-rp` handler(模板 23c733a^ 逐字复用;NB×5 version hash 取现役 id-photo 档;gpt 2.5-flare/2.6×2 新拉 version+billingConfig,per-output-image 计费,积分 4/14/38/75/150 与 15/27/38/75/150,≈ 标注待 #11);门禁 registry 1442→1451 / guard / typecheck / 112 tests 全绿 |
 | 波2 frontend | arui `58d312db7`:mapping 9 行 / IMAGE_ASYNC_MODEL_IDS 9 行(P0) / TEXT_STRENGTH +6(沿前身分;3 新档无证据不进榜) / canvas i18n 9 行(6 复用前身 key 零 locale,3 新 key ×32 locale) / branding 9 条 / verify 断言 32→38;typecheck+verify:branding/premium/brand-color/i18n 全绿 |
 | 存量债(非本批) | arui `verify:model-selection` 在 buildComparisonAssignment 对空池工具崩溃——**HEAD 干净基线同样复现**,与本批无关,建议另立修复任务 |
-| 待办 | 波3:用户放行后 arui 先行 push → image-workers push(KV 翻转 1451)→ 波4 Lead:KV 对账 + 首账单回填(2.6 系积分 ≈)+ verify:catalog-mapping CI |
+| 待办 | ~~波3/波4~~ 已完成,见 §七 |
+
+## 七、波3+波4 执行终态(2026-11-18 09:49,**全批完成上线**)
+
+| 步骤 | 结果 |
+|---|---|
+| 时序修正 | 本批纯新增,arui verify CI 对 KV 硬校验 → **backend 先行**(「arui 先行」是删档批时序,新增批不适用) |
+| image-workers push | `bd15418` → CI 44217495686 ✓ / Deploy 44217495515 ✓;`verify:catalog` **1451 entries 全 active** ✓ |
+| arui push | `58d312db7` → verify-model-id-mapping 44217755048 ✓ / Build+deploy 44217754944 ✓ |
+| 端到端探针 | `gpt-image-2-5-flare-rp` low/1K/1:1 真实生成 ✓:request 718a7754,status completed,1×PNG 落 R2(image.arui.ai);Replicate 通路+工厂+计费链路全通 |
+| 小坑 | `/generate` 探针:IMAGE_WORKERS_URL 带尾斜杠会拼出 `//generate`,路由 regex `^\/generate$` 不匹配 → 无 `what` 字段的裸 NOT_FOUND(易误判为 modelId 不存在);排查时先查 URL 拼接 |
+| 遗留 | ① 2.6 系两档积分 15/27/38/75/150 为页价换算(≈),**首账单回填(#11)**;② arui `verify:model-selection` 空池崩溃存量债(§六),另立修复;③ 3 个新 gpt 档 descriptionKey 暂复用家族键,本地化细化另批 |
 
 ---
-*创建:Lead 2026-11-18 09:08;改道修订 09:13;改道落地检查 09:18;波1+2 执行 09:32(hold)。*
+*创建:Lead 2026-11-18 09:08;改道修订 09:13;落地检查 09:18;波1+2 hold 09:32;波3+4 上线 09:49。终态:9 档 -rp 全部上线,KV 1451,端到端实证。*
