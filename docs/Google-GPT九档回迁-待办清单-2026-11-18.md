@@ -75,5 +75,15 @@
 | N-2 | gpt 2.5-flare / 2.6×2 计价 | T2 读 billingConfig 后按 ×300 换算,页价锚点缺失时标 `≈` 待首账单回填(#11) |
 | N-3 | 混合上游挂载 | 若池白名单结构不允许,回退方案 = 显式表行(先例:数字段显式表) |
 
+## 六、执行终态(2026-11-18 09:32,波1+波2 完成,**双仓本地 hold 未 push**)
+
+| 项 | 结果 |
+|---|---|
+| N-1 拍板 | `-rp` 后缀 ✓ |
+| 波1 backend | image-workers `bd15418`:9 档 `-rp` handler(模板 23c733a^ 逐字复用;NB×5 version hash 取现役 id-photo 档;gpt 2.5-flare/2.6×2 新拉 version+billingConfig,per-output-image 计费,积分 4/14/38/75/150 与 15/27/38/75/150,≈ 标注待 #11);门禁 registry 1442→1451 / guard / typecheck / 112 tests 全绿 |
+| 波2 frontend | arui `58d312db7`:mapping 9 行 / IMAGE_ASYNC_MODEL_IDS 9 行(P0) / TEXT_STRENGTH +6(沿前身分;3 新档无证据不进榜) / canvas i18n 9 行(6 复用前身 key 零 locale,3 新 key ×32 locale) / branding 9 条 / verify 断言 32→38;typecheck+verify:branding/premium/brand-color/i18n 全绿 |
+| 存量债(非本批) | arui `verify:model-selection` 在 buildComparisonAssignment 对空池工具崩溃——**HEAD 干净基线同样复现**,与本批无关,建议另立修复任务 |
+| 待办 | 波3:用户放行后 arui 先行 push → image-workers push(KV 翻转 1451)→ 波4 Lead:KV 对账 + 首账单回填(2.6 系积分 ≈)+ verify:catalog-mapping CI |
+
 ---
-*创建:Lead 2026-11-18 09:08;改道修订 09:13;改道落地检查 09:18。状态:检查完毕,待 N 组拍板,未执行。*
+*创建:Lead 2026-11-18 09:08;改道修订 09:13;改道落地检查 09:18;波1+2 执行 09:32(hold)。*
