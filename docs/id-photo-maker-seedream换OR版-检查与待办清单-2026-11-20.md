@@ -125,7 +125,7 @@
 
 ### 11.1 拍板（用户 2026-11-20 12:44）
 
-D1 = **仅 id-photo-maker**；D2 = 默认档 `seedream-5-5` + 默认分辨率 1K；D3 = **4K 非硬需求**（seedream-4→5-5，接受丢 4K）；**D4 = 新增 `seedream-5-0-flash` 低价档**（fixed 6；证件照已验证可行）；D5 = 5-0-pro **精确 `{1K:15, 2K:28}`**（含输入 $0.003/张）。
+D1 = **仅 id-photo-maker**；D2 = **默认档 `seedream-5-0-flash`（fixed 6，默认分辨率 1K）**——用户 2026-11-20 13:4x 明确「Seedream 5.0 Flash 为默认档」后修正（初版按建议误设为 5-5，已改正）；D3 = **4K 非硬需求**（seedream-4→5-5，接受丢 4K）；**D4 = 新增 `seedream-5-0-flash` 低价档**（fixed 6；证件照已验证可行）；D5 = 5-0-pro **精确 `{1K:15, 2K:28}`**（含输入 $0.003/张）。
 
 ### 11.2 执行（4 旧 → 5 新，net +1）
 
@@ -159,3 +159,11 @@ D1 = **仅 id-photo-maker**；D2 = 默认档 `seedream-5-5` + 默认分辨率 1K
 2. 4K 能力：5-5 最高 2K；保留 4K 的用户路径为 `seedream-4-5-or`（fixed 12）与 `seedream-5-lite-or`（2K/4K，fixed 11）。
 3. 家族另 4 工具（passport×2 / headshot / photo-enhancer）仍为 Replicate 版 seedream（P-2 范围外）；如需统一另立批次。
 4. OR 同步链路已登记 IMAGE_ASYNC 11min（新 5 档），旧 4 条已按排空时序移除。
+
+### 11.5 默认档修正（2026-11-20 13:41，用户口径）
+
+- 用户明确「**Seedream 5.0 Flash 为默认档**」→ id-photo-maker 的 `defaultModelId` 由 `arui-ai-id-photo-maker-seedream-5-5` 改为 **`arui-ai-id-photo-maker-seedream-5-0-flash`**（fixed 6、默认 1K；5-5 仍为最高版本手选档）。
+- commit **`6152a56ab`**（4 文件 / +7 −5，纯默认档值 + 注释口径）；CI [verify-mapping #44681546424](https://github.com/nico-zhuo/arui/actions/runs/44681546424) ✓ / [Build&Deploy #44681546633](https://github.com/nico-zhuo/arui/actions/runs/44681546633) ✓（Deploy `62d6bfeb`）。
+- 数字全部不变：snapshot **1651/1651 孤儿 0**、mapping **1651**、catalog total **1696**、hard fail 0、soft warn 45、branding 1651、premium 84、rank 39。
+- 线上抽查：`/ai-passport-photo-generator/id-photo-maker` 工具栏默认 = **Seedream 5.0 Flash | 1K**；档位行 `Seedream 5.0 Flash PREMIUM 6 · 2K · 10-60s`（默认成本 **9 → 6**）。
+- 边界：本次只改 ai-id-photo-maker；其它工具默认档未动（95 个图片工具此前已是 seedream-5-0-flash；家族另 4 工具仍为 Replicate 默认 seedream-4，P-2 范围外）。
