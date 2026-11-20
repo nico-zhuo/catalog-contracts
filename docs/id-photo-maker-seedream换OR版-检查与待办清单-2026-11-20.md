@@ -118,3 +118,44 @@
 
 ---
 *创建：Lead 2026-11-20 12:0x；本轮只检查与分配，未执行任何改动。*
+
+---
+
+## 十一、执行终态（2026-11-20 13:2x，**已上线 + 已实测 1 次**）
+
+### 11.1 拍板（用户 2026-11-20 12:44）
+
+D1 = **仅 id-photo-maker**；D2 = 默认档 `seedream-5-5` + 默认分辨率 1K；D3 = **4K 非硬需求**（seedream-4→5-5，接受丢 4K）；**D4 = 新增 `seedream-5-0-flash` 低价档**（fixed 6；证件照已验证可行）；D5 = 5-0-pro **精确 `{1K:15, 2K:28}`**（含输入 $0.003/张）。
+
+### 11.2 执行（4 旧 → 5 新，net +1）
+
+| 阶段 | 仓 | commit | 结果 |
+|---|---|---|---|
+| T1 新建 5 OR 档 | image-workers | `d9353a5` | registry 1512→**1517**、guard 1572；Deploy ✓；sync 1517/1517；verify 1517/0 deprecated |
+| T2 前端触点 | arui | `13e30bd54` | mapping 1650→**1651**、默认档 `seedream-5-5`、branding 5 条、IMAGE_ASYNC +5、remap；CI ✓（snapshot 1651、catalog total 1700/mapping 1651/hard fail 0/soft warn 49 窗口期）；Deploy ✓ |
+| T3 标废→删档→清 KV | image-workers | `874c357`（标废，4 deprecated）→ `353ebfa`（删 4 目录，registry **1513**） | Deploy ✓；sync 1513/1513；verify **1513 entries / 0 deprecated**；KV 删旧 4 key + 顺手清 1 个既有孤儿（`ai-2x2-picturer-flux-3-image`）→ `model:image:*` **1513 条 = registry，孤儿 0** |
+| T4 前端收口 | arui | `7a5ae529f` | 删旧 4 条 IMAGE_ASYNC、注释/docs 收口；CI ✓：snapshot **1651/1651 孤儿 0**、catalog total **1696** / mapping **1651** / hard fail **0** / soft warn **45**（回落）；Deploy ✓ |
+
+- **最终数字**：image-workers registry/KV **1513**、guard **1568**、typecheck 0、tests 118；arui mapping/branding/snapshot **1651**、premium 84（存量 WARN）、rank 39、catalog total 1696 / soft warn 45。
+- 旧 4 个 Replicate seedream modelId **永久烧毁**；旧档 in-flight 排空后删除；legacy remap（client + catalog 双形态）指向新档（standard→5-5，pro/master 不变）。
+- **零共享文件改动、零 schema 变更、locales 零改动**。
+
+### 11.3 端到端实测（1 次，真实生成）
+
+| 项 | 结果 |
+|---|---|
+| 方式 | 临时分支 + 一次性 GitHub Actions 工作流（CI runner 可直连 worker；本机 workers.dev 被 DNS/SNI 阻断），**测后分支已删除、main 未受影响** |
+| 输入 | 公开人像（randomuser.me，128×128 jpg）→ worker `/upload` 落 R2：`image.arui.ai/image/uploads/2af6ad5e-….jpg`（5,242 B） |
+| 请求 | `POST /generate`：model **`ai-id-photo-maker-seedream-5-5`**、`image_urls:[输入图]`、`attire:"business-suit"`、`background_color:"white"`、`resolution:"1K"` |
+| request_id | `d305e151-c779-4c69-995f-1cb390ea0daa` |
+| 结果 | pending ×4 → **completed，22s**；产出 **832×1110 PNG（1.22 MB，≈3:4 画幅）** 落 R2，`image.arui.ai/image/generations/ai-id-photo-maker-seedream-5-5/…-0.png`，HTTP 200 / `image/png` |
+| 质量核对 | 换正装 + 纯白职业底 + 身份保持（与输入同一人），**OR seedream-5-5 的 I2I 通路 + 3:4 锁 + attire/background 注入全通** |
+| 证据图 | `docs/assets/id-photo-or-seedream-5-5-probe-2026-11-20.png` |
+| 未覆盖 | BFF 积分扣减（探针直连 worker）；批量/多档画质评测未做（按「实测一次」口径） |
+
+### 11.4 遗留
+
+1. 默认档价格：`seedream-5-5` 默认 1K = 9 积分（与旧 seedream-4 的 9 持平）；2K 为 14 积分。
+2. 4K 能力：5-5 最高 2K；保留 4K 的用户路径为 `seedream-4-5-or`（fixed 12）与 `seedream-5-lite-or`（2K/4K，fixed 11）。
+3. 家族另 4 工具（passport×2 / headshot / photo-enhancer）仍为 Replicate 版 seedream（P-2 范围外）；如需统一另立批次。
+4. OR 同步链路已登记 IMAGE_ASYNC 11min（新 5 档），旧 4 条已按排空时序移除。
